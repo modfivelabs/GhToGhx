@@ -5,7 +5,7 @@ GhToGhx also has commands for **listing** gh and ghx files in addition to the co
 
 There's a dedicated command for **deleting** the .ghx file copies by removing the temporary subfolders is created in the first place, including all the folder's content. (GhToGhx does **not remove or touch** any pre-existing ghx files in anyway which are located in their original folders)
 
-_Fig 1. Here an example of Convert ("C") gh files into .ghx versions placed into subfolders named **...\ghx_tmp**_
+_Fig 1. Here an example of Convert ("C") gh files into .ghx versions placed into subfolders named **...\\_ghx_tmp**_
 
 ![Fig 1.](https://discourse-cdn-sjc1.com/mcneel/uploads/default/original/3X/a/8/a8029c112ae7e2c06bb13958b6ba77cd976a6f83.png)
 
