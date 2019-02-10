@@ -1,0 +1,6 @@
+.hgignore
+.hg/
+.hg*
+.vs/
+GhToGhx/obj/
+GhToGhx/bin/
