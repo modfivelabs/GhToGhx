@@ -139,13 +139,13 @@ namespace GhToGhx
                         PrintCountResult(@"Deleted {0} GhToGhx-related log files from disk.", cnt);
                         break;
 
-                    case "D":
+                    case "d":
                         cnt = ListGhxTempFolders(startpath);
                         PrintCountResult(@"Found {0} \" + FOLDERNAME_GHX_TMP + " folders", cnt);
                         break;
 
                     // LIST
-                    case "G":
+                    case "g":
                         // LIST regular .gh files
                         cnt = ListGhFilenames(startpath, false); // must NOT be single-unique (meaning, no ghx-version)
                         PrintCountResult("Found {0} .gh files", cnt);
@@ -231,7 +231,7 @@ namespace GhToGhx
                     // --------------------------------------------------------------------------------------------
                     WriteLine(COLOR_DOTTED_LINE, new string('.', ruler_width));
                     // left+right column
-                    Write(ConsoleColor.DarkCyan, "  G  : List *.gh files".PadRight(mid_column)); Write(COLOR_DOTTED_LINE, "|");
+                    Write(ConsoleColor.DarkCyan, "  g  : List *.gh files".PadRight(mid_column)); Write(COLOR_DOTTED_LINE, "|");
                     Write(COLOR_CMD_EXTRA, "  +/- : Verbose ON/OFF".PadRight(mid_column)); WriteLine(COLOR_DOTTED_LINE, "|");
                     // left+right column
                     Write(ConsoleColor.DarkCyan, $"  x  : List {EXTENSION_MASK_GHX} (Xml) files".PadRight(mid_column)); Write(COLOR_DOTTED_LINE, "|");
@@ -240,7 +240,7 @@ namespace GhToGhx
                     Write(ConsoleColor.DarkCyan, $"  z  : List {EXTENSION_MASK_GZIP} (GZip) files".PadRight(mid_column)); Write(COLOR_DOTTED_LINE, "|");
                     Write(COLOR_CMD_EXTRA, "  Q   : Quit".PadRight(mid_column)); WriteLine(COLOR_DOTTED_LINE, "|");
                     // left+right column
-                    Write(ConsoleColor.DarkCyan, $"  D  : List {FOLDERNAME_GHX_TMP} folders".PadRight(mid_column)); Write(COLOR_DOTTED_LINE, "|");
+                    Write(ConsoleColor.DarkCyan, $"  d  : List {FOLDERNAME_GHX_TMP} folders".PadRight(mid_column)); Write(COLOR_DOTTED_LINE, "|");
                     Write(COLOR_CMD_EXTRA, "  c/C : Clear console/Log files".PadRight(mid_column)); WriteLine(COLOR_DOTTED_LINE, "|");
                     // --------------------------------------------------------------------------------------------
                     WriteLine(COLOR_DOTTED_LINE, new string('.', ruler_width));
@@ -270,15 +270,25 @@ namespace GhToGhx
                             return;
 
                         case ConsoleKey.D:
-                            cnt = ListGhxTempFolders(startpath);
-                            var msg = "Found {0} " + string.Format(@"\{0} folders", FOLDERNAME_GHX_TMP);
-                            PrintCountResult(msg, cnt);
-                            break;
+                            if (!IsSHIFT(key)) // d
+                            {
+                                cnt = ListGhxTempFolders(startpath);
+                                var msg = "Found {0} " + string.Format(@"\{0} folders", FOLDERNAME_GHX_TMP);
+                                PrintCountResult(msg, cnt);
+                                continue;
+                            }
+                            WriteUnknownCommand();
+                            continue;
 
                         case ConsoleKey.G:
-                            cnt = ListGhFilenames(startpath, false); // must NOT be single-unique (meaning, no ghx-version)
-                            PrintCountResult("Found {0} .gh-files", cnt);
-                            break;
+                            if (!IsSHIFT(key)) // g
+                            {
+                                cnt = ListGhFilenames(startpath, false); // must NOT be single-unique (meaning, no ghx-version)
+                                PrintCountResult("Found {0} .gh-files", cnt);
+                                continue;
+                            }
+                            WriteUnknownCommand();
+                            continue;
 
                         case ConsoleKey.X:
                             // (X)
@@ -318,13 +328,13 @@ namespace GhToGhx
                             {
                                 // "R" = Ghx (Xml folders)
                                 cnt = RemoveGhxTempFolders(startpath, FOLDERNAME_GHX_TMP);
-                                PrintCountResult(@"Removed {0} '\"+FOLDERNAME_GHX_TMP+"' (Xml) folders", cnt);
+                                PrintCountResult(@"Removed {0} '\" + FOLDERNAME_GHX_TMP + "' (Xml) folders", cnt);
                             }
                             else
                             {
                                 // "r" = Ghz (GZip folders)
                                 cnt = RemoveGhxTempFolders(startpath, FOLDERNAME_GZIP_TMP);
-                                PrintCountResult(@"Removed {0} '\"+FOLDERNAME_GZIP_TMP+"' (GZip) folders", cnt);
+                                PrintCountResult(@"Removed {0} '\" + FOLDERNAME_GZIP_TMP + "' (GZip) folders", cnt);
                             }
                             break;
 
@@ -335,7 +345,7 @@ namespace GhToGhx
                             {
                                 // COMPRESS -> GZIP
                                 var folders_cnt = 0; cnt = CompressToGZipFiles(startpath, out folders_cnt);
-                                var sub_msg = string.Format(@"in {0} new '"+FOLDERNAME_GZIP_TMP+"' sub-folders.", folders_cnt);
+                                var sub_msg = string.Format(@"in {0} new '" + FOLDERNAME_GZIP_TMP + "' sub-folders.", folders_cnt);
                                 PrintCountResult("Compressed {0} files to *.ghx.gz (GZip) and placed them " + sub_msg, cnt);
                             }
                             // !SHIFT (z)
@@ -374,6 +384,10 @@ namespace GhToGhx
                                 m_log = false;
                                 PrintColoredResult(" Log: ", ConsoleColor.Red, "OFF");
                             }
+                            break;
+
+                        default:
+                            WriteUnknownCommand();
                             break;
 
                     } // switch
@@ -445,6 +459,13 @@ namespace GhToGhx
         private static bool IsSHIFT(ConsoleKeyInfo key)
         {
             return (key.Modifiers & ConsoleModifiers.Shift) != 0;
+        }
+
+        private static void WriteUnknownCommand()
+        {
+            WriteLine(ConsoleColor.Red, "=================");
+            WriteLine(ConsoleColor.Red, " Unknown command ");
+            WriteLine(ConsoleColor.Red, "=================");
         }
 
         private static int LogFileNames(List<string> filenames, string filepath)
