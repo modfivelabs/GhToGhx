@@ -1,4 +1,4 @@
-﻿
+﻿using System.Resources;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ghtoghx")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("GhToGhx")]
+[assembly: AssemblyDescription("Converts and Compresses Grasshopper files (.gh) to temporary sub-folders under the .gh files.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ghtoghx")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCompany("RIL")]
+[assembly: AssemblyProduct("GhToGhx")]
+[assembly: AssemblyCopyright("MIT, Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -35,3 +35,5 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: NeutralResourcesLanguage("en-BZ")]
+
