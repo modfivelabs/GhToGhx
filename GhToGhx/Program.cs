@@ -3,6 +3,8 @@
 | Author: RIL, 2019-02-12
 | License: MIT, see separate license file LICENSE.md
 +------------------------------------------------------------------------------------+
+HISTORY
+1.0.2: Fixed erroneous log message in command for removing temp folders (_gzip was reported as _ghx)
 */
 namespace GhToGhx
 {
@@ -167,7 +169,7 @@ namespace GhToGhx
                         break;
 
                     // REMOVE GHX
-                    case "R":
+                    case "R":                        
                         // REMOVE _ghx folders (Xml)
                         cnt = RemoveGhxTempFolders(startpath, FOLDERNAME_GHX_TMP);
                         PrintCountResult(@"Removed {0} '\" + FOLDERNAME_GHX_TMP + "' (Xml) folders", cnt);
@@ -877,7 +879,7 @@ namespace GhToGhx
                         {
                             folders_cnt++;
                             Directory.Delete(temp_path, true);
-                            if (m_verbose) { Write(ConsoleColor.DarkRed, " -"); Console.Write("[{0}] ", folders_cnt); Write(ConsoleColor.DarkRed, "Removed"); Console.Write(" folder: {0}", path); WriteLine(ConsoleColor.DarkRed, @"\" + FOLDERNAME_GHX_TMP); }
+                            if (m_verbose) { Write(ConsoleColor.DarkRed, " -"); Console.Write("[{0}] ", folders_cnt); Write(ConsoleColor.DarkRed, "Removed"); Console.Write(" folder: {0}", path); WriteLine(ConsoleColor.DarkRed, $@"\{temp_path}"); }
                         }
                     }
                     return folders_cnt;
