@@ -67,12 +67,11 @@ namespace GhToGhx
 
             if (args.Length == 0)
             {
-                Console.WriteLine("-----------------------------------------------");
-                WriteLine(ConsoleColor.DarkRed,
-                                  "    Missing command line option. Please enter\n"
-                                + "    a path or a filename and try again.\n"
-                                + "    Press any key to return to the prompt.");
-                Console.WriteLine("-----------------------------------------------");
+                WriteLine(ConsoleColor.DarkRed, "+-----------------------------------------------+");
+                WriteLine(ConsoleColor.DarkRed, "|    Missing command line option. Please enter  |");
+                WriteLine(ConsoleColor.DarkRed, "|    a path or a filename and try again.        |");
+                WriteLine(ConsoleColor.DarkRed, "+-----------------------------------------------+");
+                Console.WriteLine("     Press any key to return to the prompt:");
                 Console.ReadKey();
                 return;
             }
@@ -169,7 +168,7 @@ namespace GhToGhx
                         break;
 
                     // REMOVE GHX
-                    case "R":                        
+                    case "R":
                         // REMOVE _ghx folders (Xml)
                         cnt = RemoveGhxTempFolders(startpath, FOLDERNAME_GHX_TMP);
                         PrintCountResult(@"Removed {0} '\" + FOLDERNAME_GHX_TMP + "' (Xml) folders", cnt);
@@ -879,7 +878,7 @@ namespace GhToGhx
                         {
                             folders_cnt++;
                             Directory.Delete(temp_path, true);
-                            if (m_verbose) { Write(ConsoleColor.DarkRed, " -"); Console.Write("[{0}] ", folders_cnt); Write(ConsoleColor.DarkRed, "Removed"); Console.Write(" folder: {0}", path); WriteLine(ConsoleColor.DarkRed, $@"\{temp_path}"); }
+                            if (m_verbose) { Write(ConsoleColor.DarkRed, " -"); Console.Write("[{0}] ", folders_cnt); Write(ConsoleColor.DarkRed, "Removed"); Console.Write(" folder: {0}", path); WriteLine(ConsoleColor.DarkRed, $@"\{temp_folder}"); }
                         }
                     }
                     return folders_cnt;
