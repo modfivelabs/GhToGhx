@@ -5,3 +5,8 @@
 GhToGhx/obj/
 GhToGhx/bin/
 GhToGhx/GhToGhx.csproj.user
+packages/
+GhToGhx/packages.config
+_RELEASE/
+GhToGhx/GhToGhx_TemporaryKey.pfx
+img/zip.svg
