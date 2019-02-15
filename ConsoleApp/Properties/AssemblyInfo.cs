@@ -1,17 +1,16 @@
-﻿using System.Resources;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GhToGhx")]
-[assembly: AssemblyDescription("Converts and Compresses Grasshopper files (.gh) to temporary sub-folders under the .gh files.")]
+[assembly: AssemblyTitle("ConsoleApp")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("RIL")]
-[assembly: AssemblyProduct("GhToGhx")]
-[assembly: AssemblyCopyright("MIT, Copyright ©  2019")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ConsoleApp")]
+[assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("7dccfb69-d031-4dac-8d82-5ed699f4309b")]
+[assembly: Guid("76a42ce8-aa2d-49be-916e-2bbbff8ef48e")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,6 +33,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: NeutralResourcesLanguage("en-US")]
-
+[assembly: AssemblyFileVersion("1.1.4.0")]

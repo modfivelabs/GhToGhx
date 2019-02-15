@@ -10,3 +10,7 @@ GhToGhx/packages.config
 _RELEASE/
 GhToGhx/GhToGhx_TemporaryKey.pfx
 img/zip.svg
+ConsoleApp.Tests/bin/
+ConsoleApp/bin/
+ConsoleApp/obj/
+ConsoleApp.Tests/obj/
