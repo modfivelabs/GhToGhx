@@ -13,22 +13,27 @@ REM	? means pause (prompt ant wait for a key to be pressed
 REM 	m Toggle menu visibility (relevant only to the Console Windows mode).
 REM ---------------------------------------------------------------------------------
 
+REM Empty line - Prompt at ?
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ ?
+
 REM - LOG regular Grasshopper files (.gh)
-.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +gL
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +gL?
 REM - CREATING Xml versions (ghx)
-.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +XL
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +XL?
 REM - CREATING compressed GZip versions (gzip)
-.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +ZL
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +ZL?
 REM - LOG ghx file-lists to disk
-.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +xL
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +xL?
 REM - LOG GZip file-lists to disk
-.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +zL
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +zL?
 REM - LOG Ghx and GZip foldername lists to disk
-.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +dL
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +dL?
 REM - REMOVING ghx folders and files ("L" doesn't play any role here)
 .\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +R
 REM - REMOVING GZip folders and files
-.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +r
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +r?
 REM - CLEAR Log files 
-REM - Also pause (? = prompt) to avid terminating so that a screenshot can be taken
+REM - Also pause (? = prompt) to avoid terminating so that a screenshot can be taken
 .\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ +C?
+REM Empty line - Prompt at ?
+.\ghtoghx.exe D:\DEV\CAD\GH\GH_Workbench\__ScriptComponents\ ?
