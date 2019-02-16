@@ -203,6 +203,13 @@
             <param name="extension_color">Color of the extension.</param>
             <param name="filename_color">Color of the filename.</param>
         </member>
+        <member name="M:ConsoleApp.GhToGhxApp.GetPrefixByFolderName(System.String)">
+            <summary>
+            Returns an "x" if the temp folder contains "\_ghz" or "z" if the folder contains "\_gzip", otherwise a space (to fill the space of one char).
+            </summary>
+            <param name="foldername">The foldername; the full path or only a single foldername</param>
+            <returns>Returns x, z or " " if nottemp folder for one of the converted formats was detected.</returns>
+        </member>
         <member name="M:ConsoleApp.GhToGhxApp.Write(System.String,System.ConsoleColor)">
             <summary>
             Colored WriteLine with default color.

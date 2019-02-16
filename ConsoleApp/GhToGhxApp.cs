@@ -13,11 +13,12 @@ namespace ConsoleApp
     /// <summary>Class holding the actual content of the GhToGhx Console Application</summary>
     public class GhToGhxApp
     {
-
-        private const ConsoleColor FOLDER_COLOR = ConsoleColor.DarkCyan;
-        private const ConsoleColor FOLDER_SEPARATOR_COLOR = ConsoleColor.Gray;
-        private const ConsoleColor FILENAME_COLOR = ConsoleColor.Cyan;
-        private const ConsoleColor EXTENSION_COLOR = ConsoleColor.DarkGreen;
+        // Colors used in method signatures (can't use instantiated types)
+        //private const ConsoleColor COLOR_DEFAULT = ConsoleColor.White;
+        //private const ConsoleColor FOLDER_COLOR = ConsoleColor.DarkCyan;
+        //private const ConsoleColor FOLDER_SEPARATOR_COLOR = ConsoleColor.Gray;
+        //private const ConsoleColor FILENAME_COLOR = ConsoleColor.Cyan;
+        //private const ConsoleColor EXTENSION_COLOR = ConsoleColor.DarkGreen;
 
         /// <summary>Initializes a new instance of the <see cref="GhToGhxApp"/> class.</summary>
         public GhToGhxApp()
@@ -38,10 +39,10 @@ namespace ConsoleApp
                 ColDefault = ConsoleColor.White,
                 ColDeleteItem = ConsoleColor.Red,
                 ColDottedLine = ConsoleColor.DarkGray,
-                ColExtension = EXTENSION_COLOR,
-                ColFilename = FILENAME_COLOR,
-                ColFolderNames = FOLDER_COLOR, // ConsoleColor.DarkCyan,
-                ColFolderSeparator = FOLDER_SEPARATOR_COLOR, // ConsoleColor.White,
+                ColExtension = ColorTheme.EXTENSION_COLOR,
+                ColFilename = ColorTheme.FILENAME_COLOR,
+                ColFolderNames = ColorTheme.FOLDER_COLOR, // ConsoleColor.DarkCyan,
+                ColFolderSeparator = ColorTheme.FOLDER_SEPARATOR_COLOR, // ConsoleColor.White,
                 ColGrasshopperGreen = ConsoleColor.DarkGreen,
                 ColGhx = ConsoleColor.Green,
                 ColGh = ConsoleColor.DarkGreen,
@@ -73,6 +74,12 @@ namespace ConsoleApp
         /// <summary>A Theme container holding color combinations for named parts of the print output.</summary>
         private struct ColorTheme
         {
+            public const ConsoleColor COLOR_DEFAULT = ConsoleColor.White;
+            public const ConsoleColor FOLDER_COLOR = ConsoleColor.DarkCyan;
+            public const ConsoleColor FOLDER_SEPARATOR_COLOR = ConsoleColor.Gray;
+            public const ConsoleColor FILENAME_COLOR = ConsoleColor.Cyan;
+            public const ConsoleColor EXTENSION_COLOR = ConsoleColor.DarkGreen;
+
             public ConsoleColor ColCmdExtra; //  = ConsoleColor.Yellow;
             public ConsoleColor ColConsoleResult; // = ConsoleColor.White;
             public ConsoleColor ColDefault; //  = ConsoleColor.White;
@@ -948,12 +955,10 @@ namespace ConsoleApp
 
                     // Pick color depending on type of trailing temp-folder (ghx or gzip)
                     temp_folder = path_arr[path_arr.Length - 1];
-                    var prefix_char = "";
 
                     var dir_color = GetFolderColor(temp_folder);
 
-                    // prefix char:
-                    prefix_char = (temp_folder == FOLDERNAME_TMP_GHX) ? "x" : "z";
+                    var prefix_char = GetPrefixByFolderName(temp_folder);
 
                     Write(dir_color, $" {prefix_char}"); Write($"[{inc}] "); WritePath(truncated_path); WriteLine(dir_color, temp_folder);
                 }
@@ -1391,15 +1396,16 @@ namespace ConsoleApp
                     // split and remove last part as to write that part in other color
                     var path_arr = GetTruncatedPath(path, out string truncated_path);
 
-                    // prefix depending on trailing temp-folder _ghx or _gzip (or default)
                     var temp_folder = path_arr[path_arr.Length - 1];
-                    var print_char = (temp_folder == FOLDERNAME_TMP_GHX) ? " x" : " z";
+
+                    // prefix depending on trailing temp-folder _ghx or _gzip (or default)
+                    var prefix_char = GetPrefixByFolderName(temp_folder);
 
                     // path color depending on trailing temp-folder _ghx or _gzip (or default)
                     var dir_color = GetFolderColor(temp_folder);
 
                     // write the entire filepath
-                    Write(dir_color, $" {print_char}"); Write(line: $"[{cnt}] "); WritePath($@"{truncated_path}\");
+                    Write(dir_color, $" {prefix_char}"); Write(line: $"[{cnt}] "); WritePath($@"{truncated_path}\");
                     if (HasTempFolder(path))
                     {
                         WritePath($@"{temp_folder}\", Theme.ColFolderSeparator, dir_color);
@@ -1432,7 +1438,7 @@ namespace ConsoleApp
             }
             if (!Directory.Exists(startpath))
             {
-                WriteLine(ConsoleColor.Red, "Path not found: " + startpath);
+                WriteLine(Theme.ColWarningText, "Path not found: " + startpath);
                 return false;
             }
 
@@ -1567,7 +1573,7 @@ namespace ConsoleApp
         /// <param name="path">Full file or folder path.</param>
         /// <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
         /// <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
-        private static void WriteLinePath(string path, ConsoleColor dir_color = FOLDER_COLOR, ConsoleColor separator_color = FOLDER_SEPARATOR_COLOR)
+        private static void WriteLinePath(string path, ConsoleColor dir_color = ColorTheme.FOLDER_COLOR, ConsoleColor separator_color = ColorTheme.FOLDER_SEPARATOR_COLOR)
         {
             WritePath(path, dir_color, separator_color);
             Console.WriteLine();
@@ -1579,7 +1585,7 @@ namespace ConsoleApp
         /// <param name="path">Full file or folder path.</param>
         /// <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
         /// <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
-        private static void WritePath(string path, ConsoleColor separator_color = FOLDER_SEPARATOR_COLOR, ConsoleColor dir_color = FOLDER_COLOR)
+        private static void WritePath(string path, ConsoleColor separator_color = ColorTheme.FOLDER_SEPARATOR_COLOR, ConsoleColor dir_color = ColorTheme.FOLDER_COLOR)
         {
             var has_trailing_slash = !string.IsNullOrEmpty(path) && path[path.Length - 1].Equals(@"\\");
             var folders = path.Split('\\');
@@ -1612,7 +1618,7 @@ namespace ConsoleApp
         /// <param name="filename">The filename.</param>
         /// <param name="extension_color">Color of the extension.</param>
         /// <param name="filename_color">Color of the filename.</param>
-        private void WriteLineFileName(string filename, ConsoleColor extension_color = EXTENSION_COLOR, ConsoleColor filename_color = FILENAME_COLOR)
+        private void WriteLineFileName(string filename, ConsoleColor extension_color = ColorTheme.EXTENSION_COLOR, ConsoleColor filename_color = ColorTheme.FILENAME_COLOR)
         {
             // override
             if (string.IsNullOrEmpty(filename))
@@ -1631,11 +1637,11 @@ namespace ConsoleApp
         /// <param name="filename">The filename.</param>
         /// <param name="extension_color">Color of the extension.</param>
         /// <param name="filename_color">Color of the filename.</param>
-        private void WriteFileName(string filename, ConsoleColor extension_color = EXTENSION_COLOR, ConsoleColor filename_color = FILENAME_COLOR)
+        private void WriteFileName(string filename, ConsoleColor extension_color = ColorTheme.EXTENSION_COLOR, ConsoleColor filename_color = ColorTheme.FILENAME_COLOR)
         {
             if (string.IsNullOrEmpty(filename))
             {
-                Console.WriteLine();
+                WriteLine();
                 return;
             }
 
@@ -1667,11 +1673,29 @@ namespace ConsoleApp
             Write(filename_color, fname); Write(extension_color, ext);
         }
 
+        /// <summary>
+        /// Returns an "x" if the temp folder contains "\_ghz" or "z" if the folder contains "\_gzip", otherwise a space (to fill the space of one char).
+        /// </summary>
+        /// <param name="foldername">The foldername; the full path or only a single foldername</param>
+        /// <returns>Returns x, z or " " if nottemp folder for one of the converted formats was detected.</returns>
+        private static char GetPrefixByFolderName(string foldername)
+        {
+            if (foldername.Contains(FOLDERNAME_TMP_GHX))
+            {
+                return 'x';
+            }
+            else if (foldername.Contains(FOLDERNAME_TMP_GZIP))
+            {
+                return 'z';
+            }
+
+            return ' '; // fill one char space
+        }
 
         /// <summary>
         /// Colored WriteLine with default color.
         /// </summary>
-        private static void Write(string line, ConsoleColor custom_color = ConsoleColor.White)
+        private static void Write(string line, ConsoleColor custom_color = ColorTheme.COLOR_DEFAULT)
         {
             if (string.IsNullOrEmpty(line))
                 return;
@@ -1682,7 +1706,7 @@ namespace ConsoleApp
         /// <summary>
         /// Colored Write
         /// </summary>
-        private static void Write(ConsoleColor custom_color = ConsoleColor.White, string str = "")
+        private static void Write(ConsoleColor custom_color = ColorTheme.COLOR_DEFAULT, string str = "")
         {
             if (string.IsNullOrEmpty(str))
                 return;
@@ -1696,7 +1720,7 @@ namespace ConsoleApp
         /// <summary>
         /// Colored WriteLine with default color.
         /// </summary>
-        private void WriteLine(string line, ConsoleColor custom_color = ConsoleColor.White)
+        private void WriteLine(string line, ConsoleColor custom_color = ColorTheme.COLOR_DEFAULT)
         {
             if (string.IsNullOrEmpty(line))
             {
@@ -1709,7 +1733,7 @@ namespace ConsoleApp
         /// <summary>
         /// Colored WriteLine
         /// </summary>
-        private static void WriteLine(ConsoleColor custom_color = ConsoleColor.White, string str = "")
+        private static void WriteLine(ConsoleColor custom_color = ColorTheme.COLOR_DEFAULT, string str = "")
         {
             if (string.IsNullOrEmpty(str))
             {
