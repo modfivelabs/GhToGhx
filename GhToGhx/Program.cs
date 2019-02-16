@@ -6,6 +6,8 @@
 */
 
 // HISTORY
+// 1.1.5: Refactoring. Dedicated write methods for Folder paths and Filenames. ColorTheme extended. Introduced Xml Documentation with GhostDoc). Fixed isse #4 (scrambled tmep-paths).
+// 1.1.4: Heavy refactoring, move entire app content to a separate class. Introduced XUnit Test, and ColorTheme.
 // 1.0.3: Added options to hide menu ("m" toggle)and menu-header ("h" toggle). Separated drawing of menu to Draw methods
 // 1.0.2: Fixed erroneous log message in command for removing temp folders (_gzip was reported as _ghx)
 

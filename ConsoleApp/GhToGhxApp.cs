@@ -10,11 +10,19 @@ using System.Threading.Tasks;
 namespace ConsoleApp
 {
 
+    /// <summary>Class holding the actual content of the GhToGhx Console Application</summary>
     public class GhToGhxApp
     {
-        // CONSTRUCTOR
+
+        private const ConsoleColor FOLDER_COLOR = ConsoleColor.DarkCyan;
+        private const ConsoleColor FOLDER_SEPARATOR_COLOR = ConsoleColor.Gray;
+        private const ConsoleColor FILENAME_COLOR = ConsoleColor.Cyan;
+        private const ConsoleColor EXTENSION_COLOR = ConsoleColor.DarkGreen;
+
+        /// <summary>Initializes a new instance of the <see cref="GhToGhxApp"/> class.</summary>
         public GhToGhxApp()
         {
+            // CONSTRUCTOR
             Console.WindowWidth = 140;
             m_args = null;
             StartFolder = string.Empty;
@@ -26,10 +34,17 @@ namespace ConsoleApp
             Theme = new ColorTheme()
             {
                 ColCmdExtra = ConsoleColor.Yellow,
+                ColConsoleResult = ConsoleColor.White,
                 ColDefault = ConsoleColor.White,
+                ColDeleteItem = ConsoleColor.Red,
                 ColDottedLine = ConsoleColor.DarkGray,
-                ColFolderNames = ConsoleColor.DarkCyan,
+                ColExtension = EXTENSION_COLOR,
+                ColFilename = FILENAME_COLOR,
+                ColFolderNames = FOLDER_COLOR, // ConsoleColor.DarkCyan,
+                ColFolderSeparator = FOLDER_SEPARATOR_COLOR, // ConsoleColor.White,
+                ColGrasshopperGreen = ConsoleColor.DarkGreen,
                 ColGhx = ConsoleColor.Green,
+                ColGh = ConsoleColor.DarkGreen,
                 ColGzip = ConsoleColor.Yellow,
                 ColMissingArgument = ConsoleColor.DarkRed,
                 ColMnuCommand_gdxz = ConsoleColor.DarkCyan,
@@ -43,28 +58,34 @@ namespace ConsoleApp
                 ColPressKey = ConsoleColor.White,
                 ColReadKey = ConsoleColor.Red,
                 ColTmpFolderGhx = ConsoleColor.Green,
-                ColTmpFolderGZip = ConsoleColor.Yellow,
+                ColTmpFolderGZip = ConsoleColor.DarkYellow,
                 ColUnknownCommand = ConsoleColor.Red,
-                ColSelectCommand = ConsoleColor.White
+                ColRemoveItem = ConsoleColor.DarkRed,
+                ColSelectCommand = ConsoleColor.White,
+                ColSkippedItem = ConsoleColor.DarkRed,
+                ColToggleON = ConsoleColor.Green,
+                ColToggleOFF = ConsoleColor.Red,
+                ColWarningText = ConsoleColor.Red
             };
         }
 
-        public enum ExitCode
-        {
-            Error = -1,
-            Ok,
-            Terminate
-        }
-
         // COLOR THEME
-        public struct ColorTheme
+        /// <summary>A Theme container holding color combinations for named parts of the print output.</summary>
+        private struct ColorTheme
         {
             public ConsoleColor ColCmdExtra; //  = ConsoleColor.Yellow;
+            public ConsoleColor ColConsoleResult; // = ConsoleColor.White;
             public ConsoleColor ColDefault; //  = ConsoleColor.White;
+            public ConsoleColor ColDeleteItem;
             public ConsoleColor ColDottedLine; //  = ConsoleColor.DarkGray;
+            public ConsoleColor ColExtension; //  = ConsoleColor.DarkCyan;
+            public ConsoleColor ColFilename; //  = ConsoleColor.DarkCyan;
             public ConsoleColor ColFolderNames; //  = ConsoleColor.DarkCyan;
+            public ConsoleColor ColFolderSeparator; //  = ConsoleColor.DarkCyan;
+            public ConsoleColor ColGh; // = ConsoleColor.DarkGreen;
             public ConsoleColor ColGzip; //  = ConsoleColor.Yellow;
             public ConsoleColor ColGhx; //  = ConsoleColor.Green;
+            public ConsoleColor ColGrasshopperGreen; //  = ConsoleColor.Green;
             public ConsoleColor ColMissingArgument; //  = ConsoleColor.DarkRed;
             public ConsoleColor ColMnuCommand_gdxz; //  = ConsoleColor.DarkCyan;
             public ConsoleColor ColMnuCommand_Rr; //  = ConsoleColor.DarkRed;
@@ -79,7 +100,20 @@ namespace ConsoleApp
             public ConsoleColor ColTmpFolderGhx; // = ColGhx;
             public ConsoleColor ColTmpFolderGZip; // = ColGzip;
             public ConsoleColor ColUnknownCommand; //  = ConsoleColor.Red;
+            public ConsoleColor ColRemoveItem; // = ConsoleColor.Red,
             public ConsoleColor ColSelectCommand; //  = ConsoleColor.White;
+            public ConsoleColor ColSkippedItem; //  = ConsoleColor.DarkRed;
+            public ConsoleColor ColToggleON; // = ConsoleColor.Green;
+            public ConsoleColor ColToggleOFF; // = ConsoleColor.Red;
+            public ConsoleColor ColWarningText; //  = ConsoleColor.Red;
+        }
+
+        /// <summary>Named exit codes</summary>
+        public enum ExitCode
+        {
+            Error = -1,
+            Ok,
+            Terminate
         }
 
         private const bool VERBOSE_DEFAULT = true;
@@ -104,8 +138,8 @@ namespace ConsoleApp
 
         const string EXTENSION_GH_GHX_POSTFIX = "x"; // filename.gh -> filename.ghx.gz
         const string EXTENSION_GH_GZIP_POSTFIX = "x" + EXTENSION_GZIP; // filename.gh -> filename.ghx.gz
-        const string FOLDERNAME_GHX_TMP = "_ghx";
-        const string FOLDERNAME_GZIP_TMP = "_gzip";
+        const string FOLDERNAME_TMP_GHX = "_ghx";
+        const string FOLDERNAME_TMP_GZIP = "_gzip";
         const string LOGFILENAME_GH = @"\" + APPNAME + "-gh-files.log";
         const string LOGFILENAME_GHX = @"\" + APPNAME + "-ghx-files.log";
         const string LOGFILENAME_GHX_FOLDERS = @"\" + APPNAME + "-ghx-folders.log";
@@ -113,26 +147,26 @@ namespace ConsoleApp
         const string LOGFILENAME_GZIP_FOLDERS = @"\" + APPNAME + "-gzip-folders.log";
 
         // PROPERTIES
-        public string[] m_args;
+        private string[] m_args;
         private string m_currentoptions;
         private bool m_islogfiles = false; // whether to log to the UI and only dumpt the output to the disk log file
         private string m_startfolder;
-        public ColorTheme Theme { get; set; }
-        public string CurrentOptions {
+        private ColorTheme Theme { get; set; }
+        private string CurrentOptions {
             get { return m_currentoptions; }
             set { if (value != m_currentoptions) { m_currentoptions = value; } }
         }
         private string Extension { get; set; }
-        public string FileName { get; set; }
+        private string FileName { get; set; }
         private bool IsDrawMenu { get; set; } // whether to draw a "menu" to the UI at each (manual) console loop
         private bool IsDrawMenuHeader { get; set; } // whether to draw a "menu header" to the UI at each (manual) console loop
-        public bool IsLogFiles {
+        private bool IsLogFiles {
             get { return m_islogfiles; }
             set { if (value != m_islogfiles) { m_islogfiles = value; } }
         }
         private bool IsPrompt { get; set; }
         private bool IsVerbose { get; set; } // whether to log to the UI and only dumpt the output to the disk log file
-        public string StartFolder {
+        private string StartFolder {
             get { return m_startfolder; }
             set {
                 if (m_startfolder != value)
@@ -148,8 +182,9 @@ namespace ConsoleApp
         }
 
         /// <summary>
-        /// Whether the '?' char was provided. WARNING: Characters in CurrentOptions will be consumed
-        /// in the command loop so this property will answer correctly only once.
+        /// Returns true of the command option '?' char was provided. Attention: Characters in the property CurrentOptions will be consumed
+        /// in the command loop when checking for a specific command char, and therefore this property will answer only once whether a char 
+        /// is present in the option string or not.
         /// </summary>
         public bool GetOptionIsPrompt()
         {
@@ -158,6 +193,7 @@ namespace ConsoleApp
             {
                 this.ConsumeOption('?');
             }
+
             return result;
         }
 
@@ -170,27 +206,26 @@ namespace ConsoleApp
             {
                 return LOG_DEFAULT;
             }
+
             if (CurrentOptions.Contains('L'))
             {
                 ConsumeOption('L');
                 return true;
             }
+
             if (CurrentOptions.Contains('l'))
             {
                 ConsumeOption('l');
                 return false;
             }
+
             return LOG_DEFAULT;
         }
 
         private bool HasVerbosityOption()
         {
-            var result = HasCommandOptions &&
-                (
-                CurrentOptions.Contains('-')
-                ||
-                CurrentOptions.Contains('+')
-                );
+            var result = HasCommandOptions && (CurrentOptions.Contains('-') || CurrentOptions.Contains('+'));
+
             return result;
         }
 
@@ -200,16 +235,19 @@ namespace ConsoleApp
             {
                 return VERBOSE_DEFAULT;
             }
+
             if (CurrentOptions.Contains('-'))
             {
                 ConsumeOption('-');
                 return false;
             }
+
             if (CurrentOptions.Contains('+'))
             {
                 ConsumeOption('+');
                 return true;
             }
+
             return VERBOSE_DEFAULT;
         }
 
@@ -301,7 +339,7 @@ namespace ConsoleApp
                         break;
 
                     default:
-                        WriteLine(ConsoleColor.Red, $"{key.Key} is not a recognised command.");
+                        WriteLine(Theme.ColWarningText, $"{key.Key} is not a recognised command.");
                         break;
                 }
             }
@@ -344,7 +382,7 @@ namespace ConsoleApp
                         if (IsSHIFT(key))
                         {
                             cnt = ClearGhLogfiles();
-                            ColorWriteConsoleResultCount(@"Deleted {0} GhToGhx-related log files from disk.", cnt);
+                            WriteConsoleResult(@"Deleted {0} GhToGhx-related log files from disk.", cnt);
                             break;
                         }
                         // else lowercase "c"
@@ -355,8 +393,8 @@ namespace ConsoleApp
                         if (!IsSHIFT(key)) // d
                         {
                             cnt = ListTempFolders();
-                            var msg = "Found {0} " + string.Format(@"\{0} folders", FOLDERNAME_GHX_TMP);
-                            ColorWriteConsoleResultCount(msg, cnt);
+                            var msg = "Found {0} " + string.Format(@"\{0} folders", FOLDERNAME_TMP_GHX);
+                            WriteConsoleResult(msg, cnt);
                             continue;
                         }
                         WriteUnknownCommand();
@@ -366,7 +404,7 @@ namespace ConsoleApp
                         if (!IsSHIFT(key)) // lowercase g
                         {
                             cnt = ListGhFilenames(false); // must NOT be single-unique (meaning, no ghx-version)
-                            ColorWriteConsoleResultCount("Found {0} .gh-files", cnt);
+                            WriteConsoleResult("Found {0} .gh-files", cnt);
                             break;
                         }
                         WriteUnknownCommand();
@@ -395,15 +433,15 @@ namespace ConsoleApp
                         if (IsSHIFT(key))
                         {
                             // CONVERT to Ghx (XML)
-                            var folders_cnt = 0; cnt = ConvertToGhxFiles(out folders_cnt);
-                            var sub_msg = string.Format("in {0} new '{1}' sub-folders.", folders_cnt, FOLDERNAME_GHX_TMP);
-                            ColorWriteConsoleResultCount("Converted {0} files to .ghx and placed them " + sub_msg, cnt);
+                            cnt = ConvertToGhxFiles(out int dir_cnt);
+                            var sub_msg = string.Format("in {0} new '{1}' sub-folders.", dir_cnt, FOLDERNAME_TMP_GHX);
+                            WriteConsoleResult("Converted {0} files to .ghx and placed them " + sub_msg, cnt);
                             break;
                         }
                         // else (x):
                         // LIST Ghx files
-                        cnt = ListGhxFilenames(EXTENSION_MASK_GHX, LOGFILENAME_GHX);
-                        ColorWriteConsoleResultCount("Found {0} .ghx (Xml) files", cnt);
+                        cnt = ListGhxOrGZipFilenames(EXTENSION_MASK_GHX, LOGFILENAME_GHX);
+                        WriteConsoleResult("Found {0} .ghx (Xml) files", cnt);
                         break;
 
                     case ConsoleKey.R:
@@ -411,13 +449,13 @@ namespace ConsoleApp
                         if (IsSHIFT(key))
                         {
                             // "R" = Ghx (Xml folders)
-                            cnt = RemoveGhxTempFolders(FOLDERNAME_GHX_TMP);
-                            ColorWriteConsoleResultCount(@"Removed {0} '\" + FOLDERNAME_GHX_TMP + "' (Xml) folders", cnt);
+                            cnt = RemoveGhxTempFolders(FOLDERNAME_TMP_GHX);
+                            WriteConsoleResult($@"Removed {cnt} '\{FOLDERNAME_TMP_GHX}' (Xml) folders");
                             break;
                         }
                         // else lowercae "r" = Ghz (GZip folders)
-                        cnt = RemoveGhxTempFolders(FOLDERNAME_GZIP_TMP);
-                        ColorWriteConsoleResultCount(@"Removed {0} '\" + FOLDERNAME_GZIP_TMP + "' (GZip) folders", cnt);
+                        cnt = RemoveGhxTempFolders(FOLDERNAME_TMP_GZIP);
+                        WriteConsoleResult($@"Removed {cnt} '\{FOLDERNAME_TMP_GZIP} ' (GZip) folders");
                         break;
 
                     // GZIP 
@@ -425,28 +463,28 @@ namespace ConsoleApp
                         if (IsSHIFT(key))  // Capital "Z"
                         {
                             // COMPRESS -> GZIP
-                            var folders_cnt = 0; cnt = CompressToGZipFiles(out folders_cnt);
-                            var sub_msg = string.Format(@"in {0} new '" + FOLDERNAME_GZIP_TMP + "' sub-folders.", folders_cnt);
-                            ColorWriteConsoleResultCount("Compressed {0} files to *.ghx.gz (GZip) and placed them " + sub_msg, cnt);
+                            cnt = CompressToGZipFiles(out int dir_cnt);
+
+                            WriteConsoleResult($@"Compressed {cnt} files to *.ghx.gz (GZip) and placed them in {dir_cnt} new '{FOLDERNAME_TMP_GZIP}' sub-folders.");
                             break;
                         }
                         // else lowercase z 
                         // LIST GZIP files
-                        cnt = ListGhxFilenames(EXTENSION_MASK_GZIP, LOGFILENAME_GZIP);
-                        ColorWriteConsoleResultCount("Found {0} .ghx.gz (GZip) files", cnt);
+                        cnt = ListGhxOrGZipFilenames(EXTENSION_MASK_GZIP, LOGFILENAME_GZIP);
+                        WriteConsoleResult($"Found {cnt} .ghx.gz (GZip) files");
                         break;
 
                     case ConsoleKey.Add:
                     case ConsoleKey.OemPlus:
                         IsVerbose = true;
-                        ColorWriteConsoleResult(" Verbose: ", ConsoleColor.Green, "ON");
+                        WriteConsoleResult(" Verbose: ", Theme.ColToggleON, "ON");
                         break;
 
                     case ConsoleKey.Subtract:
                     case ConsoleKey.OemMinus:
                         // NUMPAD "-", see also OenMinus below (non-shift)
                         IsVerbose = false;
-                        ColorWriteConsoleResult(" Verbose: ", ConsoleColor.Red, "OFF");
+                        WriteConsoleResult(" Verbose: ", Theme.ColToggleOFF, "OFF");
                         break;
 
                     // enable/disable writing log file to disk
@@ -455,12 +493,12 @@ namespace ConsoleApp
                         if (IsSHIFT(key))
                         {
                             IsLogFiles = true; // enable writing log to disk
-                            ColorWriteConsoleResult(" Log: ", ConsoleColor.Green, "ON");
+                            WriteConsoleResult(" Log: ", Theme.ColToggleON, "ON");
                             break;
                         }
                         // else !SHIFT (l)
                         IsLogFiles = false;
-                        ColorWriteConsoleResult(" Log: ", ConsoleColor.Red, "OFF");
+                        WriteConsoleResult(" Log: ", Theme.ColToggleOFF, "OFF");
                         break;
 
                     default:
@@ -475,9 +513,7 @@ namespace ConsoleApp
         }
 
         /// <summary>
-        // ----------------------
         /// COMMANDLINE PARAMETERS
-        /// ----------------------
         /// </summary>
         public bool RunCommandLine()
         {
@@ -514,62 +550,62 @@ namespace ConsoleApp
                 case "C":
                     // CLEAR ALL LOG FILES
                     cnt = ClearGhLogfiles();
-                    ColorWriteConsoleResultCount(@"Deleted {0} GhToGhx-related log files from disk.", cnt);
+                    WriteConsoleResult(@"Deleted {0} GhToGhx-related log files from disk.", cnt);
                     break;
 
                 case "d":
                     cnt = ListTempFolders();
-                    ColorWriteConsoleResultCount(@"Found {0} \" + FOLDERNAME_GHX_TMP + " folders", cnt);
+                    WriteConsoleResult(@"Found {0} \" + FOLDERNAME_TMP_GHX + " folders", cnt);
                     break;
 
                 // LIST
                 case "g":
                     // LIST regular .gh files
                     cnt = ListGhFilenames(false); // must NOT be single-unique (meaning, no ghx-version)
-                    ColorWriteConsoleResultCount("Found {0} .gh files", cnt);
+                    WriteConsoleResult("Found {0} .gh files", cnt);
                     break;
 
                 // CONVERT
                 case "X":
                     // CONVERT to Ghx (XML)
                     var folders_cnt = 0; cnt = ConvertToGhxFiles(out folders_cnt);
-                    var sub_msg = string.Format("in {0} new '" + FOLDERNAME_GHX_TMP + "' sub-folders.", folders_cnt);
-                    ColorWriteConsoleResultCount("Converted {0} files to .ghx and placed them " + sub_msg, cnt);
+                    var sub_msg = string.Format("in {0} new '" + FOLDERNAME_TMP_GHX + "' sub-folders.", folders_cnt);
+                    WriteConsoleResult("Converted {0} files to .ghx and placed them " + sub_msg, cnt);
                     break;
 
                 // LIST
                 case "x":
                     // LIST Ghx files
-                    cnt = ListGhxFilenames(EXTENSION_MASK_GHX, LOGFILENAME_GHX);
-                    ColorWriteConsoleResultCount("Found {0} .ghx (Xml) files", cnt);
+                    cnt = ListGhxOrGZipFilenames(EXTENSION_MASK_GHX, LOGFILENAME_GHX);
+                    WriteConsoleResult("Found {0} .ghx (Xml) files", cnt);
                     break;
 
                 // REMOVE GHX
                 case "R":
                     // REMOVE _ghx folders (Xml)
-                    cnt = RemoveGhxTempFolders(FOLDERNAME_GHX_TMP);
-                    ColorWriteConsoleResultCount(@"Removed {0} '\" + FOLDERNAME_GHX_TMP + "' (Xml) folders", cnt);
+                    cnt = RemoveGhxTempFolders(FOLDERNAME_TMP_GHX);
+                    WriteConsoleResult(@"Removed {0} '\" + FOLDERNAME_TMP_GHX + "' (Xml) folders", cnt);
                     break;
 
                 // REMOVE GZIP
                 case "r":
                     // REMOVE _gzip folders (GZip)
-                    cnt = RemoveGhxTempFolders(FOLDERNAME_GZIP_TMP);
-                    ColorWriteConsoleResultCount(@"Removed {0} '\" + FOLDERNAME_GZIP_TMP + "' (GZip) folders", cnt);
+                    cnt = RemoveGhxTempFolders(FOLDERNAME_TMP_GZIP);
+                    WriteConsoleResult(@"Removed {0} '\" + FOLDERNAME_TMP_GZIP + "' (GZip) folders", cnt);
                     break;
 
                 // GZIP
                 case "Z":
                     // COMPRESS -> GZIP
                     folders_cnt = 0; cnt = CompressToGZipFiles(out folders_cnt);
-                    sub_msg = string.Format(@"in {0} new '" + FOLDERNAME_GZIP_TMP + "' sub-folders.", folders_cnt);
-                    ColorWriteConsoleResultCount("Compressed {0} files to *.ghx.gz (GZip) and placed them " + sub_msg, cnt);
+                    sub_msg = string.Format(@"in {0} new '" + FOLDERNAME_TMP_GZIP + "' sub-folders.", folders_cnt);
+                    WriteConsoleResult("Compressed {0} files to *.ghx.gz (GZip) and placed them " + sub_msg, cnt);
                     break;
 
                 case "z":
                     // LIST GZIP files
-                    cnt = ListGhxFilenames(EXTENSION_MASK_GZIP, LOGFILENAME_GZIP);
-                    ColorWriteConsoleResultCount("Found {0} .ghx.gz (GZip) files", cnt);
+                    cnt = ListGhxOrGZipFilenames(EXTENSION_MASK_GZIP, LOGFILENAME_GZIP);
+                    WriteConsoleResult("Found {0} .ghx.gz (GZip) files", cnt);
                     break;
 
                 default:
@@ -640,6 +676,15 @@ namespace ConsoleApp
 
 
         /// <summary>
+        /// Used by Unit Test, no null check.
+        /// </summary>
+        /// <returns>Returns the internal string array with no null checking</returns>
+        public string[] Args()
+        {
+            return m_args;
+        }
+
+        /// <summary>
         /// Input setter for CommandLine Args
         /// </summary>
         public bool Args(ref string[] _args)
@@ -668,7 +713,7 @@ namespace ConsoleApp
 
         /// <summary>
         /// Validates folder path and parameters. Returning 0 if all values are valid. 
-        /// Returns < 0 if anything is wrong. Returns -1 if folder path is invalid.
+        /// Returns less than 0 if anything is wrong. Returns -1 if folder path is invalid.
         /// Returns -2 if parameters are invalid.
         /// </summary>
         public bool ValidateInputData()
@@ -677,7 +722,7 @@ namespace ConsoleApp
                 return false;
             if (ArgsCount > 0)
             {
-
+                // TODO: Implement validation of input data (args, syntax check etc)!
             }
             return true;
         }
@@ -692,21 +737,18 @@ namespace ConsoleApp
             }
         }
 
-        /// <summary>
-        /// If returning true the main program should start examining parameters
-        /// </summary>
+        /// <summary>If returning true the main program should immediately start examining parameter chars</summary>
         public bool RunAsCommandLine {
             get {
                 return HasCommandOptions;
             }
         }
 
-        public bool HasCommandOptions {
-            get {
-                return CommandOptionsCount > 0;
-            }
-        }
+        public bool HasCommandOptions => CommandOptionsCount > 0;
 
+        /// <summary>Returns the number of strat up parapemeter (arguments). This is not 
+        /// the same as the number of commandline options which are the characters of the 
+        /// second argument (index = 1)</summary>
         public int ArgsCount {
             get {
                 if (m_args == null)
@@ -792,14 +834,14 @@ namespace ConsoleApp
             Write(Theme.ColMnuCommand_gdxz, $"  z  : List {EXTENSION_MASK_GZIP} (GZip) files".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
             Write(Theme.ColCmdExtra, "  Q   : Quit".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
             // left+right column
-            Write(Theme.ColMnuCommand_gdxz, $"  d  : List {FOLDERNAME_GHX_TMP}/{FOLDERNAME_GZIP_TMP}".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
+            Write(Theme.ColMnuCommand_gdxz, $"  d  : List {FOLDERNAME_TMP_GHX}/{FOLDERNAME_TMP_GZIP}".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
             Write(Theme.ColCmdExtra, "  c/C : Clear console/Log files".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
             // --------------------------------------------------------------------------------------------
             WriteLine(Theme.ColDottedLine, new string('.', MNU_RULER_WIDTH));
             Write(Theme.ColGhx, $@"  X  : Convert to Xml   *.ghx".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
-            Write(Theme.ColMnuCommand_Rr, $@"  R   : Remove {FOLDERNAME_GHX_TMP}\*.*".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
+            Write(Theme.ColMnuCommand_Rr, $@"  R   : Remove {FOLDERNAME_TMP_GHX}\*.*".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
             Write(Theme.ColGzip, $@"  Z  : Compress to GZip *.ghz.gz".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
-            Write(Theme.ColMnuCommand_Rr, $@"  r   : Remove {FOLDERNAME_GZIP_TMP}\*.*".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
+            Write(Theme.ColMnuCommand_Rr, $@"  r   : Remove {FOLDERNAME_TMP_GZIP}\*.*".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
             WriteLine(Theme.ColDottedLine, new string('.', MNU_RULER_WIDTH));
             // --------------------------------------------------------------------------------------------
             WriteLine(Theme.ColSelectCommand, $"  - Select any of the above operations:");
@@ -841,11 +883,11 @@ namespace ConsoleApp
         /// <summary>
         /// Returns the number of .ghx files found under the filepath. If m_islogfiles = true the 
         /// list of filenames is written to a log file on disk.
+        /// </summary>
         private int ListGhFilenames(bool unique)
         {
-            List<string> filenames = null;
             var do_sort = true;
-            if (GetGhFileNames(do_sort, out filenames, IsVerbose, unique))
+            if (GetGhFileNames(do_sort, out List<string> filenames, IsVerbose, unique))
             {
                 if (IsLogFiles) LogFileNames(filenames, StartFolder + LOGFILENAME_GH);
                 return filenames.Count;
@@ -857,10 +899,9 @@ namespace ConsoleApp
         /// Returns the number of .ghx or .ghx.gz files found under the filepath. 
         /// If m_islogfiles = true the list of filenames is written to a log-file on disk.
         /// </summary>
-        private int ListGhxFilenames(string extension_mask, string logfilename)
+        private int ListGhxOrGZipFilenames(string extension_mask, string logfilename)
         {
-            List<string> filenames = null;
-            if (GetGhxFileNames(extension_mask, true, out filenames, IsVerbose))
+            if (GetGhxFileNames(extension_mask, true, out List<string> filenames, IsVerbose))
             {
                 if (IsLogFiles) LogFileNames(filenames, StartFolder + logfilename);
                 return filenames.Count;
@@ -874,94 +915,111 @@ namespace ConsoleApp
         /// </summary>
         private int ListTempFolders()
         {
+            // Collect *both* \_ghx and \_gzip folders
             List<string> directories;
-            var tmp = Directory.GetDirectories(StartFolder, "*", SearchOption.AllDirectories)
-                .Where(path => Regex.IsMatch(path, $@"^.*\\{FOLDERNAME_GHX_TMP}|{FOLDERNAME_GZIP_TMP}$"));
-            if (tmp == null || tmp.Count() == 0)
+            var tmp_dirs = Directory.GetDirectories(StartFolder, "*", SearchOption.AllDirectories)
+                .Where(path => Regex.IsMatch(path, $@"^.*\\{FOLDERNAME_TMP_GHX}|{FOLDERNAME_TMP_GZIP}$"));
+
+            if (tmp_dirs == null || tmp_dirs.Count() == 0)
             {
                 return 0;
             }
 
+            var temp_folder = FOLDERNAME_TMP_GHX;
             var ghx_path = "";
             try
             {
-                directories = tmp.ToList();
+                directories = tmp_dirs.ToList();
                 directories.Sort();
-                var inc = 0;
                 if (IsLogFiles)
                 {
                     LogDirectoryNames(directories, StartFolder + LOGFILENAME_GHX_FOLDERS);
                 }
-                // UI display
+
+                var inc = 0;
                 foreach (var path in directories)
                 {
                     inc++;
+                    if (!IsVerbose) continue;
 
-                    if (IsVerbose)
-                    {
-                        // split and remove last part as to write that part in other color
-                        var short_path = "";
-                        var path_arr = GetShrinkedPath(path, out short_path);
+                    // == UI Display ==
+                    // split and remove last part as to write that part in other color
+                    var path_arr = GetTruncatedPath(path, out string truncated_path);
 
-                        // Pick color depending on type of trailing temp-folder (ghx or gzip)
-                        var temp_folder = path_arr[path_arr.Length - 1];
-                        var print_char = "";
-                        ConsoleColor color = Theme.ColDefault;
-                        if (temp_folder == FOLDERNAME_GHX_TMP)
-                        {
-                            print_char = "x";
-                            color = Theme.ColTmpFolderGhx;
-                        }
-                        else if (temp_folder == FOLDERNAME_GZIP_TMP)
-                        {
-                            print_char = "z";
-                            color = Theme.ColTmpFolderGZip;
-                        }
-                        Write(color, $" {print_char}"); Console.Write("[{0}] ", inc); Write(Theme.ColFolderNames, short_path); WriteLine(color, temp_folder);
-                    }
+                    // Pick color depending on type of trailing temp-folder (ghx or gzip)
+                    temp_folder = path_arr[path_arr.Length - 1];
+                    var prefix_char = "";
+
+                    var dir_color = GetFolderColor(temp_folder);
+
+                    // prefix char:
+                    prefix_char = (temp_folder == FOLDERNAME_TMP_GHX) ? "x" : "z";
+
+                    Write(dir_color, $" {prefix_char}"); Write($"[{inc}] "); WritePath(truncated_path); WriteLine(dir_color, temp_folder);
                 }
-                return inc;
             }
             catch (Exception e)
             {
-                Console.WriteLine("Attempt to list {0} & {1} directory paths failed: '{2}' : {3}", FOLDERNAME_GHX_TMP, FOLDERNAME_GZIP_TMP, ghx_path, e.Message);
+                Console.WriteLine($"Attempt to list {temp_folder} & {FOLDERNAME_TMP_GZIP} directory paths failed: '{ghx_path}' : {e.Message}");
             }
             return 0;
         }
 
-        private string[] GetShrinkedPath(string path, out string short_path)
+        private bool HasTempFolder(string path)
         {
+            if (string.IsNullOrEmpty(path))
+                return false;
+
+            // last folder is either _ghx or gzip
+            return path.Contains(FOLDERNAME_TMP_GHX) || path.Contains(FOLDERNAME_TMP_GZIP);
+        }
+
+        /// <summary>Gets the truncated path and all folder names along the path</summary>
+        /// <param name="path">The path to be truncated.</param>
+        /// <param name="truncated_path">The truncated path where the last folder is being removed.</param>
+        /// <returns>An arrray of the folder names which made up the provided path parameter.</returns>
+        private string[] GetTruncatedPath(string path, out string truncated_path)
+        {
+            // ensure output
             var path_arr = path.Split('\\');
-            short_path = "";
+            truncated_path = path;
+
+            if (!HasTempFolder(path))
+                return path_arr;
+
+            // rebuild omitting the last folder
+            truncated_path = "";
             for (var i = 0; i < path_arr.Length - 1; i++)
             {
-                short_path += path_arr[i] + "\\";
+                truncated_path += $@"{path_arr[i]}\";
             }
             return path_arr;
         }
+
         /// <summary>
-        /// ConvertToGhxFiles converts regular.gh files to xml (.ghx) format and places the files 
-        /// into new subfolders under each .gh file and names then \_ghx. Existing ghx files in the 
-        /// subfolders are overwritten without notification.
-        /// 
-        /// The temp folders are meant to be easy to removed later without risk for deleting any 
+        /// ConvertToGhxFiles converts regular.gh files to xml (.ghx) format and places the files
+        /// into new subfolders under each .gh file naming the folder as \_ghx. Existing ghx files in theses
+        /// temp  subfolders are overwritten without notification.
+        /// The temp folders are meant to be easy to remove later without risk for deleting any
         /// pre-existing original files.
         /// </summary>
+        /// <param name="folders_count">Counter recording the number of prcessed files.</param>
         private int ConvertToGhxFiles(out int folders_count)
         {
             string filename = "(Unknown)";
             folders_count = 0;
             try
             {
-                folders_count = CreateTempFolders(FOLDERNAME_GHX_TMP);
-                List<string> filenames = null;
-                if (GetGhFileNames(true, out filenames, false))
+                folders_count = CreateTempFolders(FOLDERNAME_TMP_GHX);
+
+                if (GetGhFileNames(true, out List<string> filenames, false))
                 {
-                    if (IsVerbose) { WriteLine(ConsoleColor.Green, "Converting to Xml..."); }
+                    if (IsVerbose) { WriteLine(Theme.ColDefault, "Converting to"); WriteLine(Theme.ColGhx, " Xml..."); }
 
                     // filenames.Sort(); - files are already sorted (see param "true" in the GetGhFilenames above
-                    var inc = 0;
+                    var xml_cnt = 0;
                     var ghx_path = "";
+
                     for (var i = 0; i < filenames.Count; i++)
                     {
                         filename = filenames[i]; // used due to the exception handling below
@@ -977,100 +1035,108 @@ namespace ConsoleApp
                         {
                             // log the same pathname only once
                             ghx_path = Path.GetDirectoryName(filename);
-                            if (IsVerbose) { Write(ConsoleColor.DarkCyan, "..... " + ghx_path + "\\"); WriteLine(ConsoleColor.Green, FOLDERNAME_GHX_TMP); }
+                            if (IsVerbose) { Write("....."); WritePath($@"{ghx_path}\"); WriteLine(Theme.ColGhx, FOLDERNAME_TMP_GHX); }
                         }
 
                         var archive = new GH_IO.Serialization.GH_Archive();
                         if (archive.ReadFromFile(filename))
                         {
-                            inc++;
+                            xml_cnt++;
                             var ghx_filename = Path.GetFileName(filename) + "x";
+
                             // write to screen
-                            if (IsVerbose) { Write(ConsoleColor.Green, " >"); Console.Write("[{0}] ", inc); Write(ConsoleColor.Green, $"gh->{EXTENSION_GHX}: "); Console.WriteLine(ghx_filename + " ..."); }
-                            // extract plain xml/text
+                            if (IsVerbose) { Write(Theme.ColGhx, " >"); Write($"[{xml_cnt}] "); Write(Theme.ColGh, "gh"); Write("->");  Write(Theme.ColGhx, $"{EXTENSION_GHX}: "); WriteLineFileName(ghx_filename); }
+
+                            // convert to xml
                             var ghx_xml = archive.Serialize_Xml();
+
                             // write to disk
-                            var ghx_filepath = ghx_path + $@"\{FOLDERNAME_GHX_TMP}\" + ghx_filename;
+                            var ghx_filepath = ghx_path + $@"\{FOLDERNAME_TMP_GHX}\" + ghx_filename;
                             using (TextWriter ghx_writer = new StreamWriter(ghx_filepath))
                             {
                                 ghx_writer.WriteLine(ghx_xml);
                             }
                         }
                     } // for
-                    return inc; // number of files converted
+                    return xml_cnt; // number of files converted
                 }
             }
+
             catch (Exception e)
             {
-                Console.WriteLine("Failed to read file {0}: '{1}'", filename, e.Message);
+                Console.WriteLine($"Failed to read file {filename}: '{e.Message}'");
             }
             return 0;
         }
 
         /// <summary>
-        /// CompressToGZipFiles converts regular .gh files to xml (.ghx) and compresses them to gzip 
-        /// format and places the files into a new subfolder named \_gzip. Existing gzip files are
+        /// CompressToGZipFiles converts regular .gh files into Grasshoppers xml format (.ghx) and compresses them to gzip
+        /// format and finally places the files into new subfolders named \_gzip. Any gzip files previously created with this tool (not originals) are
         /// overwritten without notification.
-        /// The temp folders are meant to be easy to removed later without risk for deleting any 
+        /// The _gzip temp folders are meant to be easy to removed later without risk for deleting any
         /// pre-existing original files.
         /// </summary>
-        private int CompressToGZipFiles(out int folders_count)
+        /// <param name="folders_cnt">the number of _gzip folders that were created to hold the converted (zipped) .ghx.gz files.</param>
+        private int CompressToGZipFiles(out int folders_cnt)
         {
-            // TODO: Return also the number of newly compressed files, not only the new temp folders
-
             string filename = "(Unknown)";
-            folders_count = 0;
+            folders_cnt = 0;
+
             try
             {
-                folders_count = CreateTempFolders(FOLDERNAME_GZIP_TMP);
-                List<string> filenames = null;
+                folders_cnt = CreateTempFolders(FOLDERNAME_TMP_GZIP);
+
                 var sortnames = true;
                 var unique_paths = true;
                 var not_verbose = false;
-                if (GetGhFileNames(sortnames, out filenames, not_verbose, unique_paths))
+
+                if (GetGhFileNames(sortnames, out List<string> filenames, not_verbose, unique_paths))
                 {
                     if (IsVerbose) { WriteLine(Theme.ColGzip, "Compressing to GZip..."); }
+
                     // filenames.Sort(); - files are already sorted (see param "true" in the GetGhFilenames above
-                    var inc = 0;
+                    var gzip_cnt = 0;
                     var ghz_path = "";
+
                     for (var i = 0; i < filenames.Count; i++)
                     {
                         filename = filenames[i]; // used due to the exception handling below
+
                         if (!File.Exists(filename))
                         {
-                            Console.WriteLine("The .gh file doesn't exist; {0}", filename); // this should never be possible
+                            WriteLine($"The .gh file doesn't exist; {filename}"); // this case can't possbly happen (?)
                             continue;
                         }
-                        // ...........................................
-                        // create the new path to the new filename.ghx
-                        // ...........................................
-                        // log the same pathname only once
+
+                        // Create a new path to the new filename.ghx and Log the same pathname only once
                         if (ghz_path != Path.GetDirectoryName(filename))
                         {
                             ghz_path = Path.GetDirectoryName(filename);
-                            if (IsVerbose) { Write(ConsoleColor.DarkCyan, "..... " + ghz_path + "\\"); WriteLine(Theme.ColGzip, FOLDERNAME_GZIP_TMP); }
+                            if (IsVerbose) { Write(Theme.ColFolderNames, "..... "); WritePath($@"{ghz_path}\"); WriteLine(Theme.ColGzip, FOLDERNAME_TMP_GZIP); }
                         }
-                        // --------------------------
+
                         // Unpack from  Binary to Xml 
-                        // --------------------------
                         var archive = new GH_IO.Serialization.GH_Archive();
                         if (archive.ReadFromFile(filename))
                         {
-                            inc++;
+                            gzip_cnt++;
+
                             var ghz_filename = Path.GetFileName(filename) + EXTENSION_GH_GZIP_POSTFIX; // filename.gh -> filename.ghx.ghz
 
                             // write to screen
-                            if (IsVerbose) { Write(Theme.ColGzip, " >"); Console.Write("[{0}] ", inc); Write(Theme.ColGzip, $@"gh->{EXTENSION_GZIP}: "); Console.WriteLine(ghz_filename); }
-                            // extract plain xml/text
+                            if (IsVerbose) { Write(Theme.ColGzip, " >"); Write($"[{gzip_cnt}] "); Write(Theme.ColGh, "gh"); Write("->"); Write(Theme.ColGzip, EXTENSION_GZIP); Write($" : "); WriteLineFileName(ghz_filename); }
+
+                            // convert to xml
                             var xml = archive.Serialize_Xml();
 
                             // compress while writing to disk
-                            var ghz_filepath = ghz_path + $@"\{FOLDERNAME_GZIP_TMP}\" + ghz_filename;
+                            var ghz_filepath = $@"{ghz_path}\{FOLDERNAME_TMP_GZIP}\{ghz_filename}";
 
                             // Compress
                             FileStream outfile = null;
                             StreamWriter writer = null;
                             System.IO.Compression.GZipStream compress = null;
+
                             try
                             {
                                 outfile = File.Create(ghz_filepath);
@@ -1084,17 +1150,35 @@ namespace ConsoleApp
                                 if (compress != null) compress.Dispose();
                                 if (outfile != null) outfile.Dispose();
                             }
-
                         }
+
                     } // for
-                    return inc; // number of files compressed
+
+                    return gzip_cnt; // number of files compressed
                 }
             }
             catch (Exception e)
             {
-                WriteLine(ConsoleColor.DarkRed, string.Format("Failed to read file {0}: '{1}'", filename, e.Message));
+                WriteLine(Theme.ColWarningText, $@"Failed to read file {filename}: '{e.Message}'");
             }
+
             return 0;
+        }
+
+
+        private ConsoleColor GetFolderColor(string foldername)
+        {
+            if (foldername.Contains(FOLDERNAME_TMP_GHX))
+            {
+                return Theme.ColGhx;
+            }
+
+            if (foldername.Contains(FOLDERNAME_TMP_GZIP))
+            {
+                return Theme.ColGzip;
+            }
+
+            return Theme.ColFolderNames; // default
         }
 
         /// <summary>
@@ -1102,42 +1186,40 @@ namespace ConsoleApp
         /// </summary>
         private int CreateTempFolders(string temp_foldername)
         {
-            List<string> directories = null;
-            List<string> filenames = null;
             var sortnames = true;
-            if (GetGhFileNames(sortnames, out filenames, verbose: false, unique: false) && ExtractUniqueFilePaths(filenames, out directories))
+            if (GetGhFileNames(sortnames, out List<string> filenames, verbose: false, unique: false) && ExtractUniqueFilePaths(filenames, out List<string> directories))
             {
                 var new_folder = "(undefined path)";
                 try
                 {
-                    if (IsVerbose) { Console.WriteLine(); WriteLine(ConsoleColor.Green, "Creating temp folders..."); }
+                    if (IsVerbose) { WriteLine(); WriteLine("Creating temp folders..."); }
+
                     directories.Sort();
-                    var folders_cnt = 0;
+
+                    var dir_cnt = 0;
                     foreach (var path in directories)
                     {
-                        new_folder = path + @"\" + temp_foldername;
+                        new_folder = $@"{path}\{temp_foldername}";
+
                         // checking if directory exists is only for counting how many new temp directories
                         // are actually being created (they may have already been created earlier)
                         if (!Directory.Exists(new_folder))
                         {
+                            dir_cnt++;
+
                             Directory.CreateDirectory(new_folder);
-                            folders_cnt++;
-                            if (IsVerbose) { Write(ConsoleColor.Green, " +"); Console.Write("[{0}] ", folders_cnt); Write(ConsoleColor.Green, "Created "); Console.Write("folder: {0}", path); WriteLine(ConsoleColor.Green, $@"\{temp_foldername}"); }
+
+                            var dir_color = GetFolderColor(temp_foldername);
+
+                            if (IsVerbose) { Write(dir_color, " +"); Write($"[{dir_cnt}] "); Write(dir_color, "Created "); Write($"folder: "); WritePath($@"{path}\"); WriteLine(dir_color, $"{temp_foldername}"); }
                         }
                     }
 
                     // Log to disk
                     if (IsLogFiles)
                     {
-                        var logfilename = "";
-                        if (temp_foldername == FOLDERNAME_GHX_TMP)
-                        {
-                            logfilename = LOGFILENAME_GHX_FOLDERS;
-                        }
-                        else if (temp_foldername == FOLDERNAME_GZIP_TMP)
-                        {
-                            logfilename = LOGFILENAME_GZIP_FOLDERS;
-                        }
+                        // this query supports only two alternatives. 
+                        var logfilename = (temp_foldername == FOLDERNAME_TMP_GHX) ? LOGFILENAME_GHX_FOLDERS : LOGFILENAME_GZIP_FOLDERS;
 
                         // Collect all temp directory names
                         var ghx_directories = new List<string>();
@@ -1145,18 +1227,22 @@ namespace ConsoleApp
                         {
                             ghx_directories.Add(path + $@"\{temp_foldername}");
                         }
-                        // Log directory names to file
+
+                        // Log directory names to log file
                         LogDirectoryNames(ghx_directories, StartFolder + logfilename);
+
                         // Log filenames to file
                         LogFileNames(filenames, StartFolder + LOGFILENAME_GH);
                     }
-                    return folders_cnt;
+
+                    return dir_cnt;
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("Attempt to create temp path ({0}) failed: '{1}'", new_folder, e.Message);
                 }
             }
+
             return 0;
         }
 
@@ -1166,26 +1252,24 @@ namespace ConsoleApp
         /// </summary>
         private int RemoveGhxTempFolders(string temp_folder)
         {
-            List<string> directories = null;
-            List<string> filenames = null;
-            if (GetGhFileNames(true, out filenames, false) && ExtractUniqueFilePaths(filenames, out directories))
+            if (GetGhFileNames(true, out List<string> filenames, false) && ExtractUniqueFilePaths(filenames, out List<string> directories))
             {
                 // remove "...\_ghx or \ghz" folders
                 try
                 {
-                    var folders_cnt = 0;
+                    var dir_cnt = 0;
                     foreach (var path in directories)
                     {
                         // recursive - deletes also sub directories
                         var temp_path = path + $@"\{temp_folder}";
                         if (Directory.Exists(temp_path))
                         {
-                            folders_cnt++;
+                            dir_cnt++;
                             Directory.Delete(temp_path, true);
-                            if (IsVerbose) { Write(ConsoleColor.DarkRed, " -"); Console.Write("[{0}] ", folders_cnt); Write(ConsoleColor.DarkRed, "Removed"); Console.Write(" folder: {0}", path); WriteLine(ConsoleColor.DarkRed, $@"\{temp_folder}"); }
+                            if (IsVerbose) { Write(Theme.ColRemoveItem, " -"); Write($"[{dir_cnt}] "); Write(Theme.ColRemoveItem, "Removed"); Write(" folder: "); WritePath($@"{ path}\"); WriteLine(Theme.ColRemoveItem, temp_folder); }
                         }
                     }
-                    return folders_cnt;
+                    return dir_cnt;
                 }
                 catch (Exception e)
                 {
@@ -1221,24 +1305,24 @@ namespace ConsoleApp
 
         /* ****
                                 // split and remove last part as to write that part in other color
-                        var short_path = "";
-                        var path_arr = GetShrinkedPath(path, out short_path);
+                        var truncated_path = "";
+                        var path_arr = GetTruncatedPath(path, out truncated_path);
 
                         // Pick color depending on type of trailing temp-folder (ghx or gzip)
                         var temp_folder = path_arr[path_arr.Length - 1];
                         var print_char = "";
                         ConsoleColor color = ConsoleColor.White;
-                        if (temp_folder == FOLDERNAME_GHX_TMP)
+                        if (temp_folder == FOLDERNAME_TMP_GHX)
                         {
                             print_char = "x";
                             color = Theme.ColTmpFolderGhx;
                         }
-                        else if (temp_folder == FOLDERNAME_GZIP_TMP)
+                        else if (temp_folder == FOLDERNAME_TMP_GZIP)
                         {
                             print_char = "z";
                             color = Theme.ColTmpFolderGZip;
                         }
-                        Write(color, $" {print_char}"); Console.Write("[{0}] ", cnt); Write(Theme.ColFolderNames, short_path); WriteLine(color, temp_folder);
+                        Write(color, $" {print_char}"); Console.Write("[{0}] ", cnt); Write(Theme.ColFolderNames, truncated_path); WriteLine(color, temp_folder);
 
 
          */
@@ -1265,6 +1349,9 @@ namespace ConsoleApp
                 Console.WriteLine("No such path found: ({0})", startpath);
                 return false;
             }
+
+            // TODO: Create dedicated method for determining extension REGEX!
+
             // Scan for file with extension ".ghx" or .ghx.gz
             List<string> ghxfiles = null;
             if (extension_mask == EXTENSION_MASK_GHX)
@@ -1279,7 +1366,7 @@ namespace ConsoleApp
             }
             else
             {
-                Console.WriteLine("Unknown file extension! ('{0}')", extension_mask);
+                WriteLine(Theme.ColWarningText, $"Unknown file extension! (\'{extension_mask}\')");
                 return false;
             }
 
@@ -1297,66 +1384,37 @@ namespace ConsoleApp
                 foreach (string filename in ghxfiles)
                 {
                     cnt++;
+
                     var path = Path.GetDirectoryName(filename);
                     var file = Path.GetFileName(filename);
 
                     // split and remove last part as to write that part in other color
-                    var short_path = "";
-                    var path_arr = GetShrinkedPath(path, out short_path);
+                    var path_arr = GetTruncatedPath(path, out string truncated_path);
 
-                    // Pick color depending on type of trailing temp-folder (ghx or gzip)
-                    var print_char = " ";
-                    ConsoleColor color = Theme.ColFolderNames;
+                    // prefix depending on trailing temp-folder _ghx or _gzip (or default)
                     var temp_folder = path_arr[path_arr.Length - 1];
-                    if (temp_folder == FOLDERNAME_GHX_TMP)
+                    var print_char = (temp_folder == FOLDERNAME_TMP_GHX) ? " x" : " z";
+
+                    // path color depending on trailing temp-folder _ghx or _gzip (or default)
+                    var dir_color = GetFolderColor(temp_folder);
+
+                    // write the entire filepath
+                    Write(dir_color, $" {print_char}"); Write(line: $"[{cnt}] "); WritePath($@"{truncated_path}\");
+                    if (HasTempFolder(path))
                     {
-                        print_char = "x";
-                        color = Theme.ColTmpFolderGhx;
+                        WritePath($@"{temp_folder}\", Theme.ColFolderSeparator, dir_color);
                     }
-                    else if (temp_folder == FOLDERNAME_GZIP_TMP)
-                    {
-                        print_char = "z";
-                        color = Theme.ColTmpFolderGZip;
-                    }
-                    Write(color, $" {print_char}"); Write(Theme.ColDefault, $"[{cnt}] "); Write(Theme.ColFolderNames, short_path); Write(color, temp_folder); WriteLine(color, @"\" + file);
+                    WriteLineFileName(file);
                 }
             }
             return true;
         }
 
-        private int ClearGhLogfiles()
-        {
-            var deleted_cnt = 0;
-            var log_files = Directory.GetFiles(StartFolder, $"{APPNAME}*.log", SearchOption.AllDirectories);
-            // .Where(file => Regex.IsMatch(file, REGEX_ALL_LOGFILE_NAMES)).ToList();
-            if (log_files != null && log_files.Length > 0)
-            {
-                deleted_cnt = log_files.Length;
-                var inc = 0;
-                foreach (string f in log_files)
-                {
-                    inc++;
-                    if (IsVerbose)
-                    {
-                        var path = Path.GetDirectoryName(f);
-                        var fname = Path.GetFileName(f);
-                        if (IsVerbose)
-                        {
-                            Console.Write("  [{0}] ", inc); Write(ConsoleColor.Red, "Deleting log file ");
-                            Console.Write(path + @"\"); Write(ConsoleColor.Red, fname);
-                            Console.WriteLine(" from disk");
-                        }
-                    }
-                    File.Delete(f);
-                }
-            }
-            return deleted_cnt;
-        }
 
-        /// <summary>
-        /// Returns a list of regular Grasshopper file names (extension .gh) found recursively  under 
-        /// the startfolder. Optionally sorts the filenames.
-        /// </summary>
+        ///// <summary>
+        ///// Returns a list of regular Grasshopper file names (extension .gh) found recursively  under 
+        ///// the startfolder. Optionally sorts the filenames.
+        ///// </summary>
         private bool GetGhFileNames(bool sortnames, out List<string> filenames, bool verbose = false, bool unique = true)
         {
             filenames = new List<string>(); // ensure valid output
@@ -1388,79 +1446,280 @@ namespace ConsoleApp
             if (ghfiles == null || ghfiles.Count() == 0)
                 return false;
 
-            var cnt = 0;
-            foreach (string filename in ghfiles)
+            var gh_cnt = 0;
+            foreach (string gh_filename in ghfiles)
             {
-                var path = Path.GetDirectoryName(filename);
-                var file = Path.GetFileName(filename);
+                var path = Path.GetDirectoryName(gh_filename);
+                var file = Path.GetFileName(gh_filename);
                 if (!unique)
                 {
-                    cnt++;
-                    filenames.Add(filename);
+                    gh_cnt++;
+
+                    filenames.Add(gh_filename);
                     if (verbose)
                     {
-                        Console.Write("  [{0}] ", cnt); Write(ConsoleColor.DarkCyan, path); Console.WriteLine("\\{0}", file);
+                        Write(line: $"  [{gh_cnt}] "); WritePath($@"{path}\"); WriteLineFileName(file);
                     }
+
                     continue; // skips checking for uniqueness below (that is, for twin .gh<-->.ghx filenames)
                 }
 
-                // Unique check:
-                if (ghxfiles == null || ghxfiles.Count == 0 || !ghxfiles.Contains(filename + "x")) // exclude .ghx files
+                // Unique check means; has no twin .ghx file among the collected filenames:
+                if (ghxfiles == null || ghxfiles.Count == 0 || !ghxfiles.Contains(gh_filename + "x")) // exclude .ghx files
                 {
-                    // IsUnique (has no twin .ghx file among the collected filenames):
-                    cnt++;
-                    filenames.Add(filename);
-                    if (verbose) { Console.Write("  [{0}] ", cnt); Write(Theme.ColFolderNames, path); Console.WriteLine("\\{0}", file); }
+                    gh_cnt++;
+                    filenames.Add(gh_filename);
+
+                    if (verbose) { Write(line: $@"  [{gh_cnt}] "); WritePath($@"{path}\"); WriteLine(line: $"{file}"); }
                 }
-                else if (verbose) { Console.Write(" -[{0}] Skipped file {1}\\", cnt, path); WriteLine(ConsoleColor.DarkRed, file); }
+                else
+                {
+                    if (verbose) { Write(Theme.ColSkippedItem, $@" -[{gh_cnt}] Skipped file: "); WritePath($@"{path}\"); WriteLine(Theme.ColSkippedItem, file); }
+                }
             }
+
             if (sortnames) { filenames.Sort(); }
+
             return true;
         }
 
-        private static void ColorWriteConsoleResultCount(string fmt_message, int cnt, bool suppress_firstline = false, bool suppress_secondline = false)
+
+        private int ClearGhLogfiles()
+        {
+            var deleted_cnt = 0;
+            var log_files = Directory.GetFiles(StartFolder, $"{APPNAME}*.log", SearchOption.AllDirectories);
+
+            // .Where(file => Regex.IsMatch(file, REGEX_ALL_LOGFILE_NAMES)).ToList();
+            if (log_files != null && log_files.Length > 0)
+            {
+                deleted_cnt = log_files.Length;
+                var log_cnt = 0;
+                foreach (string f in log_files)
+                {
+                    log_cnt++;
+
+                    File.Delete(f);
+
+                    if (!IsVerbose) continue;
+
+                    // PRINT
+                    var path = Path.GetDirectoryName(f);
+                    var fname = Path.GetFileName(f);
+                    if (IsVerbose)
+                    {
+                        Write(line: $"  [{log_cnt}] "); Write(Theme.ColDeleteItem, "Deleting log file ");
+                        Write(line: $@"{path}\"); Write(Theme.ColDeleteItem, fname);
+                        WriteLine(line: " from disk");
+                    }
+                }
+            }
+            return deleted_cnt;
+        }
+
+        /// <summary>
+        /// Writes a "result" to yje the console. Overrides other method which takes only one message string.
+        /// </summary>
+        /// <param name="message_fmt">Message containing a fomrat string with one placeholder.</param>
+        /// <param name="cnt">The count.</param>
+        /// <param name="suppress_firstline">If set to <c>true</c> [suppress firstline]. Default = false. </param>
+        /// <param name="suppress_secondline">if set to <c>true</c> [suppress secondline]. Default = false. </param>
+        private void WriteConsoleResult(string message_fmt, int cnt, bool suppress_firstline = false, bool suppress_secondline = false)
+        {
+            var msg = string.Format(message_fmt, cnt);
+            WriteConsoleResult(msg, suppress_firstline, suppress_secondline);
+        }
+
+        /// <summary>
+        /// Writes a "result" to yje the console.
+        /// </summary>
+        /// <param name="msg">The MSG.</param>
+        /// <param name="suppress_firstline">if set to <c>true</c> [suppress firstline]. Default = false. </param>
+        /// <param name="suppress_secondline">if set to <c>true</c> [suppress secondline]. Default = false. </param>
+        private void WriteConsoleResult(string msg, bool suppress_firstline = false, bool suppress_secondline = false)
         {
             // adapt line width to the string message:
-            var msg = string.Format(fmt_message, cnt);
             var line_width = msg.Length;
             // print message
-            if (!suppress_firstline) Console.WriteLine(new string('=', line_width));
-            Console.WriteLine(msg);
-            if (!suppress_secondline) Console.WriteLine(new string('=', line_width));
+            if (!suppress_firstline) { WriteLine(Theme.ColConsoleResult, new string('=', line_width)); }
+            WriteLine(line: msg);
+            if (!suppress_secondline) { WriteLine(Theme.ColConsoleResult, new string('=', line_width)); }
             Console.WriteLine();
         }
 
-        private static void ColorWriteConsoleResult(string leadstring, ConsoleColor color, string colorstring, bool suppress_firstline = false, bool suppress_secondline = false)
+        private void WriteConsoleResult(string leadstring, ConsoleColor custom_color, string colorstring, bool suppress_firstline = false, bool suppress_secondline = false)
         {
             // adapt line width to the string message:
             var msg = leadstring + colorstring;
             var line_width = msg.Length;
+
+            // Draw line
+            if (!suppress_firstline) { WriteLine(Theme.ColConsoleResult, new string('=', line_width)); }
             // print message
-            if (!suppress_firstline) Console.WriteLine(new string('=', line_width));
-            Console.Write(leadstring); WriteLine(color, colorstring);
-            if (!suppress_secondline) Console.WriteLine(new string('=', line_width));
+            Write(line: leadstring); WriteLine(custom_color, colorstring);
+            // Draw line
+            if (!suppress_secondline) { WriteLine(Theme.ColConsoleResult, new string('=', line_width)); }
             Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Writes a folder path on a line, with linefeed, with different default colors for folder name and folder separator (\).
+        /// </summary>
+        /// <param name="path">Full file or folder path.</param>
+        /// <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
+        /// <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
+        private static void WriteLinePath(string path, ConsoleColor dir_color = FOLDER_COLOR, ConsoleColor separator_color = FOLDER_SEPARATOR_COLOR)
+        {
+            WritePath(path, dir_color, separator_color);
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Writes a folder path with different default colors for folder name and folder separator (\)
+        /// </summary>
+        /// <param name="path">Full file or folder path.</param>
+        /// <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
+        /// <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
+        private static void WritePath(string path, ConsoleColor separator_color = FOLDER_SEPARATOR_COLOR, ConsoleColor dir_color = FOLDER_COLOR)
+        {
+            var has_trailing_slash = !string.IsNullOrEmpty(path) && path[path.Length - 1].Equals(@"\\");
+            var folders = path.Split('\\');
+            // remove option char from the option list and rebuild a new (remaining) options string
+            if (folders != null && folders.Length > 0)
+            {
+                for (var i = 0; i < folders.Length; i++)
+                {
+                    if (string.IsNullOrEmpty(folders[i]))
+                        continue;
+                    Write(dir_color, folders[i]);
+                    // skip last slash if the original path didn't have one
+                    if (i < folders.Length - 1)
+                    {
+                        Write(separator_color, @"\");
+                        continue;
+                    }
+                    else if (i == folders.Length - 1 && has_trailing_slash)
+                    {
+                        Write(separator_color, @"\");
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Extends the method "WriteFilename" with a new line.
+        /// </summary>
+        /// <param name="filename">The filename.</param>
+        /// <param name="extension_color">Color of the extension.</param>
+        /// <param name="filename_color">Color of the filename.</param>
+        private void WriteLineFileName(string filename, ConsoleColor extension_color = EXTENSION_COLOR, ConsoleColor filename_color = FILENAME_COLOR)
+        {
+            // override
+            if (string.IsNullOrEmpty(filename))
+            {
+                Console.WriteLine();
+                return;
+            }
+
+            WriteFileName(filename, extension_color, filename_color);
+            WriteLine();
+        }
+
+        /// <summary>
+        /// Writes the name of the line file and a new line.
+        /// </summary>
+        /// <param name="filename">The filename.</param>
+        /// <param name="extension_color">Color of the extension.</param>
+        /// <param name="filename_color">Color of the filename.</param>
+        private void WriteFileName(string filename, ConsoleColor extension_color = EXTENSION_COLOR, ConsoleColor filename_color = FILENAME_COLOR)
+        {
+            if (string.IsNullOrEmpty(filename))
+            {
+                Console.WriteLine();
+                return;
+            }
+
+            var fname = Path.GetFileNameWithoutExtension(filename);
+            var ext = Path.GetExtension(filename);
+
+            // special color for extension?
+            if (ext.Contains(EXTENSION_GHX))
+            {
+                extension_color = Theme.ColGhx;
+            }
+            else if (ext.Contains(EXTENSION_GZIP))
+            {
+                extension_color = Theme.ColGzip;
+
+                // double extensions (".ghx.gz"), thus shrink the file name once more.
+                if (fname.Contains(".ghx"))
+                {
+                    var ext2 = Path.GetExtension(fname); // this first, because we overwrite "fname" next:
+                    fname = Path.GetFileNameWithoutExtension(fname);
+                    ext = ext2 + ext;
+                }
+            }
+            else if (ext.Contains(".gh"))
+            {
+                extension_color = Theme.ColGh;
+            }
+
+            Write(filename_color, fname); Write(extension_color, ext);
+        }
+
+
+        /// <summary>
+        /// Colored WriteLine with default color.
+        /// </summary>
+        private static void Write(string line, ConsoleColor custom_color = ConsoleColor.White)
+        {
+            if (string.IsNullOrEmpty(line))
+                return;
+
+            Write(custom_color, line);
         }
 
         /// <summary>
         /// Colored Write
         /// </summary>
-        private static void Write(ConsoleColor colour = ConsoleColor.White, string line = "")
+        private static void Write(ConsoleColor custom_color = ConsoleColor.White, string str = "")
         {
+            if (string.IsNullOrEmpty(str))
+                return;
+
             var current = Console.ForegroundColor;
-            Console.ForegroundColor = colour;
-            Console.Write(line);
+            Console.ForegroundColor = custom_color;
+            Console.Write(str);
             Console.ForegroundColor = current;
+        }
+
+        /// <summary>
+        /// Colored WriteLine with default color.
+        /// </summary>
+        private void WriteLine(string line, ConsoleColor custom_color = ConsoleColor.White)
+        {
+            if (string.IsNullOrEmpty(line))
+            {
+                Console.WriteLine();
+                return;
+            }
+            WriteLine(Theme.ColDefault, line);
         }
 
         /// <summary>
         /// Colored WriteLine
         /// </summary>
-        private static void WriteLine(ConsoleColor colour = ConsoleColor.White, string line = "")
+        private static void WriteLine(ConsoleColor custom_color = ConsoleColor.White, string str = "")
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                Console.WriteLine();
+                return;
+            }
+
             var current = Console.ForegroundColor;
-            Console.ForegroundColor = colour;
-            Console.WriteLine(line);
+            Console.ForegroundColor = custom_color;
+            Console.WriteLine(str);
             Console.ForegroundColor = current;
         }
 

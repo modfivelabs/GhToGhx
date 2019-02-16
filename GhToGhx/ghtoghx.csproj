@@ -47,6 +47,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>D:\DEV\CAD\VS\RILGH\GhToGhx\files\GhToGhx_Solution.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,6 +57,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>D:\DEV\CAD\VS\RILGH\GhToGhx\files\GhToGhx_Solution.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GhToGhx</name>
+    </assembly>
+    <members>
+        <member name="M:GhToGhx.RILGH_GhToGhx.Main(System.String[])">
+            <summary>  MAIN </summary>
+        </member>
+        <member name="P:GhToGhx.RILGH_GhToGhx.ConsoleApp">
+            <summary> Class containing the actual application </summary>
+        </member>
+    </members>
+</doc>

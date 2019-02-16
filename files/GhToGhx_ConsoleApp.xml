@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ConsoleApp</name>
+    </assembly>
+    <members>
+        <member name="T:ConsoleApp.GhToGhxApp">
+            <summary>Class holding the actual content of the GhToGhx Console Application</summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:ConsoleApp.GhToGhxApp"/> class.</summary>
+        </member>
+        <member name="T:ConsoleApp.GhToGhxApp.ColorTheme">
+            <summary>A Theme container holding color combinations for named parts of the print output.</summary>
+        </member>
+        <member name="T:ConsoleApp.GhToGhxApp.ExitCode">
+            <summary>Named exit codes</summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.GetOptionIsPrompt">
+            <summary>
+            Returns true of the command option '?' char was provided. Attention: Characters in the property CurrentOptions will be consumed
+            in the command loop when checking for a specific command char, and therefore this property will answer only once whether a char 
+            is present in the option string or not.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.GetOptionIsLogFiles">
+            <summary>
+            Whether to Log file- or foldernames to a logfile on disk
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.Run(System.String[])">
+            <summary>
+            MAIN method
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.RunConsoleWindow">
+            ------------------------------------------------------------------------------
+            <summary>
+            MANUAL CONSOLE WINDOW - A "application menu" repeatedly shown before and after 
+            each command until selecting Q (quit) or pressing the Escape key. </summary>
+            ------------------------------------------------------------------------------
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.RunCommandLine">
+            <summary>
+            COMMANDLINE PARAMETERS
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.ConsumeOption(System.Char)">
+            <summary>
+            Splits the string options with the option-char and removes the char from the string.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.SeparateFileInfo">
+            <summary>
+            Ensures that only the path and not the filename is part of the path variable.
+            Also ensures that the path is not truncated if no filename is provided.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.Args">
+            <summary>
+            Used by Unit Test, no null check.
+            </summary>
+            <returns>Returns the internal string array with no null checking</returns>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.Args(System.String[]@)">
+            <summary>
+            Input setter for CommandLine Args
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.ValidateInputData">
+            <summary>
+            Validates folder path and parameters. Returning 0 if all values are valid. 
+            Returns less than 0 if anything is wrong. Returns -1 if folder path is invalid.
+            Returns -2 if parameters are invalid.
+            </summary>
+        </member>
+        <member name="P:ConsoleApp.GhToGhxApp.RunAsConsoleWindow">
+            <summary>
+            If returning true the main program should enter a user 
+            interactive loop checking entered commands
+            </summary>
+        </member>
+        <member name="P:ConsoleApp.GhToGhxApp.RunAsCommandLine">
+            <summary>If returning true the main program should immediately start examining parameter chars</summary>
+        </member>
+        <member name="P:ConsoleApp.GhToGhxApp.ArgsCount">
+            <summary>Returns the number of strat up parapemeter (arguments). This is not 
+            the same as the number of commandline options which are the characters of the 
+            second argument (index = 1)</summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.ListGhFilenames(System.Boolean)">
+            <summary>
+            Returns the number of .ghx files found under the filepath. If m_islogfiles = true the 
+            list of filenames is written to a log file on disk.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.ListGhxOrGZipFilenames(System.String,System.String)">
+            <summary>
+            Returns the number of .ghx or .ghx.gz files found under the filepath. 
+            If m_islogfiles = true the list of filenames is written to a log-file on disk.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.ListTempFolders">
+            <summary>
+            Scans recursively for temp folders named ...\_ghx or \_gzip under the startpath. 
+            If m_islogfiles = true then the list of filenames is written to a log file on disk.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.GetTruncatedPath(System.String,System.String@)">
+            <summary>Gets the truncated path and all folder names along the path</summary>
+            <param name="path">The path to be truncated.</param>
+            <param name="truncated_path">The truncated path where the last folder is being removed.</param>
+            <returns>An arrray of the folder names which made up the provided path parameter.</returns>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.ConvertToGhxFiles(System.Int32@)">
+            <summary>
+            ConvertToGhxFiles converts regular.gh files to xml (.ghx) format and places the files
+            into new subfolders under each .gh file naming the folder as \_ghx. Existing ghx files in theses
+            temp  subfolders are overwritten without notification.
+            The temp folders are meant to be easy to remove later without risk for deleting any
+            pre-existing original files.
+            </summary>
+            <param name="folders_count">Counter recording the number of prcessed files.</param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.CompressToGZipFiles(System.Int32@)">
+            <summary>
+            CompressToGZipFiles converts regular .gh files into Grasshoppers xml format (.ghx) and compresses them to gzip
+            format and finally places the files into new subfolders named \_gzip. Any gzip files previously created with this tool (not originals) are
+            overwritten without notification.
+            The _gzip temp folders are meant to be easy to removed later without risk for deleting any
+            pre-existing original files.
+            </summary>
+            <param name="folders_cnt">the number of _gzip folders that were created to hold the converted (zipped) .ghx.gz files.</param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.CreateTempFolders(System.String)">
+            <summary>
+            Recursively creates temp folders (\_ghx or \_gzip) under folders which contains .gh files.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.RemoveGhxTempFolders(System.String)">
+            <summary>
+            Recursively removes folders named (like "\_ghx" ir \_ghz) created by the 
+            Convert or Compress functions.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.ExtractUniqueFilePaths(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String}@)">
+            <summary>
+            Extracts folders names, or filters away duplicate folder names, from the input list of file paths.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.GetGhxFileNames(System.String,System.Boolean,System.Collections.Generic.List{System.String}@,System.Boolean)">
+            <summary>
+            Returns a list of filenames with extension .ghx or .ghx.gz in temp folders under 
+            the startfolder. Optionally sorts the filenames.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WriteConsoleResult(System.String,System.Int32,System.Boolean,System.Boolean)">
+            <summary>
+            Writes a "result" to yje the console. Overrides other method which takes only one message string.
+            </summary>
+            <param name="message_fmt">Message containing a fomrat string with one placeholder.</param>
+            <param name="cnt">The count.</param>
+            <param name="suppress_firstline">If set to <c>true</c> [suppress firstline]. Default = false. </param>
+            <param name="suppress_secondline">if set to <c>true</c> [suppress secondline]. Default = false. </param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WriteConsoleResult(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Writes a "result" to yje the console.
+            </summary>
+            <param name="msg">The MSG.</param>
+            <param name="suppress_firstline">if set to <c>true</c> [suppress firstline]. Default = false. </param>
+            <param name="suppress_secondline">if set to <c>true</c> [suppress secondline]. Default = false. </param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WriteLinePath(System.String,System.ConsoleColor,System.ConsoleColor)">
+            <summary>
+            Writes a folder path on a line, with linefeed, with different default colors for folder name and folder separator (\).
+            </summary>
+            <param name="path">Full file or folder path.</param>
+            <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
+            <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WritePath(System.String,System.ConsoleColor,System.ConsoleColor)">
+            <summary>
+            Writes a folder path with different default colors for folder name and folder separator (\)
+            </summary>
+            <param name="path">Full file or folder path.</param>
+            <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
+            <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WriteLineFileName(System.String,System.ConsoleColor,System.ConsoleColor)">
+            <summary>
+            Extends the method "WriteFilename" with a new line.
+            </summary>
+            <param name="filename">The filename.</param>
+            <param name="extension_color">Color of the extension.</param>
+            <param name="filename_color">Color of the filename.</param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WriteFileName(System.String,System.ConsoleColor,System.ConsoleColor)">
+            <summary>
+            Writes the name of the line file and a new line.
+            </summary>
+            <param name="filename">The filename.</param>
+            <param name="extension_color">Color of the extension.</param>
+            <param name="filename_color">Color of the filename.</param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.Write(System.String,System.ConsoleColor)">
+            <summary>
+            Colored WriteLine with default color.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.Write(System.ConsoleColor,System.String)">
+            <summary>
+            Colored Write
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WriteLine(System.String,System.ConsoleColor)">
+            <summary>
+            Colored WriteLine with default color.
+            </summary>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.WriteLine(System.ConsoleColor,System.String)">
+            <summary>
+            Colored WriteLine
+            </summary>
+        </member>
+    </members>
+</doc>

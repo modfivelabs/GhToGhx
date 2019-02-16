@@ -23,7 +23,7 @@ namespace GhToGhx_TEST
             var args = new string[0]; // dummy value
             consoleapp.Args(ref args);
             // ACT
-            var actual = consoleapp.m_args;
+            var actual = consoleapp.Args();
             // ASSERT
             Assert.NotNull(actual);
         }
@@ -66,7 +66,7 @@ namespace GhToGhx_TEST
             var args = new string[1] { "C:\\Windows" };
             // ACT - starting with only a foldername as the first parameter should run 
             // interactively in a ConsoleWindow. Not checking for valid directory here
-            var actual = consoleapp.Args(ref args) && consoleapp.RunAsConsoleWindow && consoleapp.ArgsCount == 1;
+            var actual = consoleapp.Args(ref args) && consoleapp.RunAsConsoleWindow && consoleapp.ArgsCount== 1;
             // ASSERT
             Assert.True(expected && actual);
         }
