@@ -13,13 +13,6 @@ namespace ConsoleApp
     /// <summary>Class holding the actual content of the GhToGhx Console Application</summary>
     public class GhToGhxApp
     {
-        // Colors used in method signatures (can't use instantiated types)
-        //private const ConsoleColor COLOR_DEFAULT = ConsoleColor.White;
-        //private const ConsoleColor FOLDER_COLOR = ConsoleColor.DarkCyan;
-        //private const ConsoleColor FOLDER_SEPARATOR_COLOR = ConsoleColor.Gray;
-        //private const ConsoleColor FILENAME_COLOR = ConsoleColor.Cyan;
-        //private const ConsoleColor EXTENSION_COLOR = ConsoleColor.DarkGreen;
-
         /// <summary>Initializes a new instance of the <see cref="GhToGhxApp"/> class.</summary>
         public GhToGhxApp()
         {
@@ -32,47 +25,12 @@ namespace ConsoleApp
             IsVerbose = true;
             IsDrawMenu = true;
             IsDrawMenuHeader = true;
-            Theme = new ColorTheme()
-            {
-                ColCmdExtra = ConsoleColor.Yellow,
-                ColConsoleResult = ConsoleColor.White,
-                ColDefault = ConsoleColor.White,
-                ColDeleteItem = ConsoleColor.Red,
-                ColDottedLine = ConsoleColor.DarkGray,
-                ColExtension = ColorTheme.EXTENSION_COLOR,
-                ColFilename = ColorTheme.FILENAME_COLOR,
-                ColFolderNames = ColorTheme.FOLDER_COLOR, // ConsoleColor.DarkCyan,
-                ColFolderSeparator = ColorTheme.FOLDER_SEPARATOR_COLOR, // ConsoleColor.White,
-                ColGrasshopperGreen = ConsoleColor.DarkGreen,
-                ColGhx = ConsoleColor.Green,
-                ColGh = ConsoleColor.DarkGreen,
-                ColGzip = ConsoleColor.Yellow,
-                ColMissingArgument = ConsoleColor.DarkRed,
-                ColMnuCommand_gdxz = ConsoleColor.DarkCyan,
-                ColMnuCommand_Rr = ConsoleColor.DarkRed,
-                ColMnuFileName = ConsoleColor.DarkGray,
-                ColMnuGrasshopperName = ConsoleColor.Green,
-                ColMnuHeaderLine = ConsoleColor.DarkGray,
-                ColMnuStartFolder = ConsoleColor.White,
-                ColMnuRILText = ConsoleColor.Red,
-                ColPromt = ConsoleColor.DarkGray,
-                ColPressKey = ConsoleColor.White,
-                ColReadKey = ConsoleColor.Red,
-                ColTmpFolderGhx = ConsoleColor.Green,
-                ColTmpFolderGZip = ConsoleColor.DarkYellow,
-                ColUnknownCommand = ConsoleColor.Red,
-                ColRemoveItem = ConsoleColor.DarkRed,
-                ColSelectCommand = ConsoleColor.White,
-                ColSkippedItem = ConsoleColor.DarkRed,
-                ColToggleON = ConsoleColor.Green,
-                ColToggleOFF = ConsoleColor.Red,
-                ColWarningText = ConsoleColor.Red
-            };
+            Theme = ColorThemeDefault;
         }
 
         // COLOR THEME
         /// <summary>A Theme container holding color combinations for named parts of the print output.</summary>
-        private struct ColorTheme
+        public struct ColorTheme
         {
             public const ConsoleColor COLOR_DEFAULT = ConsoleColor.White;
             public const ConsoleColor FOLDER_COLOR = ConsoleColor.DarkCyan;
@@ -158,7 +116,7 @@ namespace ConsoleApp
         private string m_currentoptions;
         private bool m_islogfiles = false; // whether to log to the UI and only dumpt the output to the disk log file
         private string m_startfolder;
-        private ColorTheme Theme { get; set; }
+        public ColorTheme Theme { get; set; }
         private string CurrentOptions {
             get { return m_currentoptions; }
             set { if (value != m_currentoptions) { m_currentoptions = value; } }
@@ -277,6 +235,9 @@ namespace ConsoleApp
             {
                 return (int)ExitCode.Error;
             }
+
+            // there's a chance that the second argument tries to switch color theme, so lets try that:
+            if (ArgsCount == 2) { SetTheme(ref m_args); }
 
             if (RunAsCommandLine)
             {
@@ -508,6 +469,13 @@ namespace ConsoleApp
                         WriteConsoleResult(" Log: ", Theme.ColToggleOFF, "OFF");
                         break;
 
+                    case ConsoleKey.D0:
+                    case ConsoleKey.D1:
+                    case ConsoleKey.D2:
+                        SetTheme(key);
+                        //SetTheme(ref args);
+                        break;
+
                     default:
                         WriteUnknownCommand();
                         break;
@@ -519,6 +487,59 @@ namespace ConsoleApp
             // RunConsoleWindow
         }
 
+        /// <summary>
+        /// Sets theme via interactive Console Window.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        public void SetTheme(ConsoleKeyInfo key)
+        {
+            switch (key.Key)
+            {
+                case ConsoleKey.D0:
+                    Theme = GhToGhxApp.ColorThemeDefault;
+                    break;
+
+                case ConsoleKey.D1:
+                    Theme = GhToGhxApp.ColorThemeWhite;
+                    break;
+
+                case ConsoleKey.D2:
+                    Theme = GhToGhxApp.ColorThemeSiemens;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Sets theme via CommandLine char.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        public void SetTheme(ref string[] args)
+        {
+            if (args != null && args.Length > 1)
+            {
+                if (args[1].Contains("0"))
+                {
+                    Theme = GhToGhxApp.ColorThemeDefault;
+                    args[1] = args[1].Remove(args[1].IndexOf('0'), 1);
+                }
+                else if (args[1].Contains("1"))
+                {
+                    Theme = GhToGhxApp.ColorThemeWhite;
+                    args[1] = args[1].Remove(args[1].IndexOf('1'), 1);
+                }
+                else if (args[1].Contains("2"))
+                {
+                    Theme = GhToGhxApp.ColorThemeSiemens;
+                    args[1] = args[1].Remove(args[1].IndexOf('2'), 1);
+                }
+
+                // Remove empty parameter as to enable interactiuve mode (requires that only the first parameter is set)
+                if (string.IsNullOrEmpty(args[1]))
+                {
+                    args = new string[1] { args[0] }; // copy only first param, truncating the second parameter
+                }
+            }
+        }
         /// <summary>
         /// COMMANDLINE PARAMETERS
         /// </summary>
@@ -960,7 +981,7 @@ namespace ConsoleApp
 
                     var prefix_char = GetPrefixByFolderName(temp_folder);
 
-                    Write(dir_color, $" {prefix_char}"); Write($"[{inc}] "); WritePath(truncated_path); WriteLine(dir_color, temp_folder);
+                    Write(dir_color, $" {prefix_char}"); Write($"[{inc}] "); WritePath(truncated_path, Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLine(dir_color, temp_folder);
                 }
             }
             catch (Exception e)
@@ -1040,7 +1061,7 @@ namespace ConsoleApp
                         {
                             // log the same pathname only once
                             ghx_path = Path.GetDirectoryName(filename);
-                            if (IsVerbose) { Write("....."); WritePath($@"{ghx_path}\"); WriteLine(Theme.ColGhx, FOLDERNAME_TMP_GHX); }
+                            if (IsVerbose) { Write("....."); WritePath($@"{ghx_path}\", Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLine(Theme.ColGhx, FOLDERNAME_TMP_GHX); }
                         }
 
                         var archive = new GH_IO.Serialization.GH_Archive();
@@ -1050,7 +1071,7 @@ namespace ConsoleApp
                             var ghx_filename = Path.GetFileName(filename) + "x";
 
                             // write to screen
-                            if (IsVerbose) { Write(Theme.ColGhx, " >"); Write($"[{xml_cnt}] "); Write(Theme.ColGh, "gh"); Write("->");  Write(Theme.ColGhx, $"{EXTENSION_GHX}: "); WriteLineFileName(ghx_filename); }
+                            if (IsVerbose) { Write(Theme.ColGhx, " >"); Write($"[{xml_cnt}] "); Write(Theme.ColGh, "gh"); Write("->"); Write(Theme.ColGhx, $"{EXTENSION_GHX}: "); WriteLineFileName(ghx_filename); }
 
                             // convert to xml
                             var ghx_xml = archive.Serialize_Xml();
@@ -1117,7 +1138,7 @@ namespace ConsoleApp
                         if (ghz_path != Path.GetDirectoryName(filename))
                         {
                             ghz_path = Path.GetDirectoryName(filename);
-                            if (IsVerbose) { Write(Theme.ColFolderNames, "..... "); WritePath($@"{ghz_path}\"); WriteLine(Theme.ColGzip, FOLDERNAME_TMP_GZIP); }
+                            if (IsVerbose) { Write(Theme.ColFolderNames, "..... "); WritePath($@"{ghz_path}\", Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLine(Theme.ColGzip, FOLDERNAME_TMP_GZIP); }
                         }
 
                         // Unpack from  Binary to Xml 
@@ -1216,7 +1237,7 @@ namespace ConsoleApp
 
                             var dir_color = GetFolderColor(temp_foldername);
 
-                            if (IsVerbose) { Write(dir_color, " +"); Write($"[{dir_cnt}] "); Write(dir_color, "Created "); Write($"folder: "); WritePath($@"{path}\"); WriteLine(dir_color, $"{temp_foldername}"); }
+                            if (IsVerbose) { Write(dir_color, " +"); Write($"[{dir_cnt}] "); Write(dir_color, "Created "); Write($"folder: "); WritePath($@"{path}\", Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLine(dir_color, $"{temp_foldername}"); }
                         }
                     }
 
@@ -1271,7 +1292,7 @@ namespace ConsoleApp
                         {
                             dir_cnt++;
                             Directory.Delete(temp_path, true);
-                            if (IsVerbose) { Write(Theme.ColRemoveItem, " -"); Write($"[{dir_cnt}] "); Write(Theme.ColRemoveItem, "Removed"); Write(" folder: "); WritePath($@"{ path}\"); WriteLine(Theme.ColRemoveItem, temp_folder); }
+                            if (IsVerbose) { Write(Theme.ColRemoveItem, " -"); Write($"[{dir_cnt}] "); Write(Theme.ColRemoveItem, "Removed"); Write(" folder: "); WritePath($@"{ path}\", Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLine(Theme.ColRemoveItem, temp_folder); }
                         }
                     }
                     return dir_cnt;
@@ -1405,10 +1426,10 @@ namespace ConsoleApp
                     var dir_color = GetFolderColor(temp_folder);
 
                     // write the entire filepath
-                    Write(dir_color, $" {prefix_char}"); Write(line: $"[{cnt}] "); WritePath($@"{truncated_path}\");
+                    Write(dir_color, $" {prefix_char}"); Write(line: $"[{cnt}] "); WritePath($@"{truncated_path}\", Theme.ColFolderNames, Theme.ColFolderSeparator);
                     if (HasTempFolder(path))
                     {
-                        WritePath($@"{temp_folder}\", Theme.ColFolderSeparator, dir_color);
+                        WritePath($@"{temp_folder}\", Theme.ColFolderNames, Theme.ColFolderSeparator);
                     }
                     WriteLineFileName(file);
                 }
@@ -1464,7 +1485,7 @@ namespace ConsoleApp
                     filenames.Add(gh_filename);
                     if (verbose)
                     {
-                        Write(line: $"  [{gh_cnt}] "); WritePath($@"{path}\"); WriteLineFileName(file);
+                        Write(line: $"  [{gh_cnt}] "); WritePath($@"{path}\", Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLineFileName(file);
                     }
 
                     continue; // skips checking for uniqueness below (that is, for twin .gh<-->.ghx filenames)
@@ -1476,11 +1497,11 @@ namespace ConsoleApp
                     gh_cnt++;
                     filenames.Add(gh_filename);
 
-                    if (verbose) { Write(line: $@"  [{gh_cnt}] "); WritePath($@"{path}\"); WriteLine(line: $"{file}"); }
+                    if (verbose) { Write(line: $@"  [{gh_cnt}] "); WritePath($@"{path}\", Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLine(line: $"{file}"); }
                 }
                 else
                 {
-                    if (verbose) { Write(Theme.ColSkippedItem, $@" -[{gh_cnt}] Skipped file: "); WritePath($@"{path}\"); WriteLine(Theme.ColSkippedItem, file); }
+                    if (verbose) { Write(Theme.ColSkippedItem, $@" -[{gh_cnt}] Skipped file: "); WritePath($@"{path}\", Theme.ColFolderNames, Theme.ColFolderSeparator); WriteLine(Theme.ColSkippedItem, file); }
                 }
             }
 
@@ -1585,7 +1606,7 @@ namespace ConsoleApp
         /// <param name="path">Full file or folder path.</param>
         /// <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
         /// <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
-        private static void WritePath(string path, ConsoleColor separator_color = ColorTheme.FOLDER_SEPARATOR_COLOR, ConsoleColor dir_color = ColorTheme.FOLDER_COLOR)
+        private static void WritePath(string path, ConsoleColor dir_color = ColorTheme.FOLDER_COLOR, ConsoleColor separator_color = ColorTheme.FOLDER_SEPARATOR_COLOR)
         {
             var has_trailing_slash = !string.IsNullOrEmpty(path) && path[path.Length - 1].Equals(@"\\");
             var folders = path.Split('\\');
@@ -1618,7 +1639,7 @@ namespace ConsoleApp
         /// <param name="filename">The filename.</param>
         /// <param name="extension_color">Color of the extension.</param>
         /// <param name="filename_color">Color of the filename.</param>
-        private void WriteLineFileName(string filename, ConsoleColor extension_color = ColorTheme.EXTENSION_COLOR, ConsoleColor filename_color = ColorTheme.FILENAME_COLOR)
+        private void WriteLineFileName(string filename)
         {
             // override
             if (string.IsNullOrEmpty(filename))
@@ -1627,7 +1648,7 @@ namespace ConsoleApp
                 return;
             }
 
-            WriteFileName(filename, extension_color, filename_color);
+            WriteFileName(filename);
             WriteLine();
         }
 
@@ -1635,15 +1656,16 @@ namespace ConsoleApp
         /// Writes the name of the line file and a new line.
         /// </summary>
         /// <param name="filename">The filename.</param>
-        /// <param name="extension_color">Color of the extension.</param>
-        /// <param name="filename_color">Color of the filename.</param>
-        private void WriteFileName(string filename, ConsoleColor extension_color = ColorTheme.EXTENSION_COLOR, ConsoleColor filename_color = ColorTheme.FILENAME_COLOR)
+        private void WriteFileName(string filename)
         {
             if (string.IsNullOrEmpty(filename))
             {
                 WriteLine();
                 return;
             }
+
+            var extension_color = Theme.ColExtension;
+            var filename_color = Theme.ColFilename;
 
             var fname = Path.GetFileNameWithoutExtension(filename);
             var ext = Path.GetExtension(filename);
@@ -1876,5 +1898,128 @@ namespace ConsoleApp
             Console.Write("  ID:      "); WriteLine(ConsoleColor.DarkCyan, $"{{{id}}}");
         }
         */
+
+        public static ColorTheme ColorThemeDefault {
+            get {
+                return new ColorTheme()
+                {
+                    ColCmdExtra = ConsoleColor.Yellow,
+                    ColConsoleResult = ConsoleColor.White,
+                    ColDefault = ConsoleColor.White,
+                    ColDeleteItem = ConsoleColor.Red,
+                    ColDottedLine = ConsoleColor.DarkGray,
+                    ColExtension = GhToGhxApp.ColorTheme.EXTENSION_COLOR,
+                    ColFilename = GhToGhxApp.ColorTheme.FILENAME_COLOR,
+                    ColFolderNames = GhToGhxApp.ColorTheme.FOLDER_COLOR, // ConsoleColor.DarkCyan,
+                    ColFolderSeparator = GhToGhxApp.ColorTheme.FOLDER_SEPARATOR_COLOR, // ConsoleColor.White,
+                    ColGrasshopperGreen = ConsoleColor.DarkGreen,
+                    ColGhx = ConsoleColor.Green,
+                    ColGh = ConsoleColor.DarkGreen,
+                    ColGzip = ConsoleColor.Yellow,
+                    ColMissingArgument = ConsoleColor.DarkRed,
+                    ColMnuCommand_gdxz = ConsoleColor.DarkCyan,
+                    ColMnuCommand_Rr = ConsoleColor.DarkRed,
+                    ColMnuFileName = ConsoleColor.DarkGray,
+                    ColMnuGrasshopperName = ConsoleColor.Green,
+                    ColMnuHeaderLine = ConsoleColor.DarkGray,
+                    ColMnuStartFolder = ConsoleColor.White,
+                    ColMnuRILText = ConsoleColor.Red,
+                    ColPromt = ConsoleColor.DarkGray,
+                    ColPressKey = ConsoleColor.White,
+                    ColReadKey = ConsoleColor.Red,
+                    ColTmpFolderGhx = ConsoleColor.Green,
+                    ColTmpFolderGZip = ConsoleColor.DarkYellow,
+                    ColUnknownCommand = ConsoleColor.Red,
+                    ColRemoveItem = ConsoleColor.DarkRed,
+                    ColSelectCommand = ConsoleColor.White,
+                    ColSkippedItem = ConsoleColor.DarkRed,
+                    ColToggleON = ConsoleColor.Green,
+                    ColToggleOFF = ConsoleColor.Red,
+                    ColWarningText = ConsoleColor.Red
+                };
+            }
+        }
+
+        public static ColorTheme ColorThemeWhite {
+            get {
+                return new ColorTheme()
+                {
+                    ColCmdExtra = ConsoleColor.White,
+                    ColConsoleResult = ConsoleColor.White,
+                    ColDefault = ConsoleColor.White,
+                    ColDeleteItem = ConsoleColor.White,
+                    ColDottedLine = ConsoleColor.White,
+                    ColExtension = ConsoleColor.White,
+                    ColFilename = ConsoleColor.White,
+                    ColFolderNames = ConsoleColor.White,
+                    ColFolderSeparator = ConsoleColor.White,
+                    ColGrasshopperGreen = ConsoleColor.White,
+                    ColGhx = ConsoleColor.White,
+                    ColGh = ConsoleColor.White,
+                    ColGzip = ConsoleColor.White,
+                    ColMissingArgument = ConsoleColor.White,
+                    ColMnuCommand_gdxz = ConsoleColor.White,
+                    ColMnuCommand_Rr = ConsoleColor.White,
+                    ColMnuFileName = ConsoleColor.White,
+                    ColMnuGrasshopperName = ConsoleColor.White,
+                    ColMnuHeaderLine = ConsoleColor.White,
+                    ColMnuStartFolder = ConsoleColor.White,
+                    ColMnuRILText = ConsoleColor.Red,
+                    ColPromt = ConsoleColor.White,
+                    ColPressKey = ConsoleColor.White,
+                    ColReadKey = ConsoleColor.White,
+                    ColTmpFolderGhx = ConsoleColor.White,
+                    ColTmpFolderGZip = ConsoleColor.White,
+                    ColUnknownCommand = ConsoleColor.White,
+                    ColRemoveItem = ConsoleColor.White,
+                    ColSelectCommand = ConsoleColor.White,
+                    ColSkippedItem = ConsoleColor.White,
+                    ColToggleON = ConsoleColor.White,
+                    ColToggleOFF = ConsoleColor.White,
+                    ColWarningText = ConsoleColor.Red
+                };
+            }
+        }
+
+        public static ColorTheme ColorThemeSiemens {
+            get {
+                return new ColorTheme()
+                {
+                    ColCmdExtra = ConsoleColor.White,
+                    ColConsoleResult = ConsoleColor.White,
+                    ColDefault = ConsoleColor.White,
+                    ColDeleteItem = ConsoleColor.White,
+                    ColDottedLine = ConsoleColor.White,
+                    ColExtension = ConsoleColor.White,
+                    ColFilename = ConsoleColor.Cyan,
+                    ColFolderNames = ConsoleColor.White,
+                    ColFolderSeparator = ConsoleColor.White,
+                    ColGrasshopperGreen = ConsoleColor.White,
+                    ColGhx = ConsoleColor.White,
+                    ColGh = ConsoleColor.White,
+                    ColGzip = ConsoleColor.White,
+                    ColMissingArgument = ConsoleColor.White,
+                    ColMnuCommand_gdxz = ConsoleColor.White,
+                    ColMnuCommand_Rr = ConsoleColor.White,
+                    ColMnuFileName = ConsoleColor.White,
+                    ColMnuGrasshopperName = ConsoleColor.White,
+                    ColMnuHeaderLine = ConsoleColor.White,
+                    ColMnuStartFolder = ConsoleColor.White,
+                    ColMnuRILText = ConsoleColor.Red,
+                    ColPromt = ConsoleColor.White,
+                    ColPressKey = ConsoleColor.White,
+                    ColReadKey = ConsoleColor.White,
+                    ColTmpFolderGhx = ConsoleColor.White,
+                    ColTmpFolderGZip = ConsoleColor.White,
+                    ColUnknownCommand = ConsoleColor.White,
+                    ColRemoveItem = ConsoleColor.White,
+                    ColSelectCommand = ConsoleColor.White,
+                    ColSkippedItem = ConsoleColor.White,
+                    ColToggleON = ConsoleColor.White,
+                    ColToggleOFF = ConsoleColor.White,
+                    ColWarningText = ConsoleColor.Red
+                };
+            }
+        }
     }
 }

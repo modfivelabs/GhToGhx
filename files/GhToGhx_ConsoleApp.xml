@@ -40,6 +40,18 @@
             each command until selecting Q (quit) or pressing the Escape key. </summary>
             ------------------------------------------------------------------------------
         </member>
+        <member name="M:ConsoleApp.GhToGhxApp.SetTheme(System.ConsoleKeyInfo)">
+            <summary>
+            Sets theme via interactive Console Window.
+            </summary>
+            <param name="key">The key.</param>
+        </member>
+        <member name="M:ConsoleApp.GhToGhxApp.SetTheme(System.String[]@)">
+            <summary>
+            Sets theme via CommandLine char.
+            </summary>
+            <param name="args">The arguments.</param>
+        </member>
         <member name="M:ConsoleApp.GhToGhxApp.RunCommandLine">
             <summary>
             COMMANDLINE PARAMETERS
@@ -187,7 +199,7 @@
             <param name="dir_color">Color for folder names. If omitted it will be written default color.</param>
             <param name="separator_color">Color for folder separator (backslah). If omitted it will be written default color.</param>
         </member>
-        <member name="M:ConsoleApp.GhToGhxApp.WriteLineFileName(System.String,System.ConsoleColor,System.ConsoleColor)">
+        <member name="M:ConsoleApp.GhToGhxApp.WriteLineFileName(System.String)">
             <summary>
             Extends the method "WriteFilename" with a new line.
             </summary>
@@ -195,13 +207,11 @@
             <param name="extension_color">Color of the extension.</param>
             <param name="filename_color">Color of the filename.</param>
         </member>
-        <member name="M:ConsoleApp.GhToGhxApp.WriteFileName(System.String,System.ConsoleColor,System.ConsoleColor)">
+        <member name="M:ConsoleApp.GhToGhxApp.WriteFileName(System.String)">
             <summary>
             Writes the name of the line file and a new line.
             </summary>
             <param name="filename">The filename.</param>
-            <param name="extension_color">Color of the extension.</param>
-            <param name="filename_color">Color of the filename.</param>
         </member>
         <member name="M:ConsoleApp.GhToGhxApp.GetPrefixByFolderName(System.String)">
             <summary>
