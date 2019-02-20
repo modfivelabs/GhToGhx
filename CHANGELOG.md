@@ -1,5 +1,16 @@
 # HISTORY
 
+### 1.1.6 
+* Enhancement: ColorTheme made changeable via CommandLine or console window (pick theme with digits 0, 1, or 2).
+  Example (sets default rich color-theme = 0): .\ghtoghx.exe "d:\your path\" 0
+  
+
+### 1.1.5: 
+* Refactored. Dedicated write methods for Folder paths and Filenames. 
+* ColorTheme extended. 
+* Introduced Xml Documentation with GhostDoc). 
+* Fixed UI issue #4 which displayed scrambled temp-paths.
+
 ### 1.1.4
 * 2019-02-15 RIL
 * New: Commands to toggle-control visibility of the Menu ("m") and Header ("h") in Console Window mode.
