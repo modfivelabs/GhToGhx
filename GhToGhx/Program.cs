@@ -6,6 +6,7 @@
 */
 
 // HISTORY
+// 1.1.7: Spelling "ghz.gz" -> "ghx.gz"
 // 1.1.6: Enhancement: ColorTheme made changeable via CommandLine or console window (pick theme with digit 0, 1, or 2).
 // 1.1.5: Refactoring. Dedicated write methods for Folder paths and Filenames. ColorTheme extended. Introduced Xml Documentation with GhostDoc). Fixed isse #4 (scrambled tmep-paths).
 // 1.1.4: Heavy refactoring, move entire app content to a separate class. Introduced XUnit Test, and ColorTheme.

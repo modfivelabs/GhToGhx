@@ -868,7 +868,7 @@ namespace ConsoleApp
             WriteLine(Theme.ColDottedLine, new string('.', MNU_RULER_WIDTH));
             Write(Theme.ColGhx, $@"  X  : Convert to Xml   *.ghx".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
             Write(Theme.ColMnuCommand_Rr, $@"  R   : Remove {FOLDERNAME_TMP_GHX}\*.*".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
-            Write(Theme.ColGzip, $@"  Z  : Compress to GZip *.ghz.gz".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
+            Write(Theme.ColGzip, $@"  Z  : Compress to GZip *.ghx.gz".PadRight(MNU_COLUMN_MID)); Write(Theme.ColDottedLine, "|");
             Write(Theme.ColMnuCommand_Rr, $@"  r   : Remove {FOLDERNAME_TMP_GZIP}\*.*".PadRight(MNU_COLUMN_MID)); WriteLine(Theme.ColDottedLine, "|");
             WriteLine(Theme.ColDottedLine, new string('.', MNU_RULER_WIDTH));
             // --------------------------------------------------------------------------------------------
